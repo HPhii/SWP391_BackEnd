@@ -1,17 +1,16 @@
 package com.example.koifishfengshui.service;
 
-import com.example.koifishfengshui.dto.UserRegistrationDTO;
-import com.example.koifishfengshui.entity.User;
-import com.example.koifishfengshui.enums.Role;
+import com.example.koifishfengshui.model.request.UpdateUserRequest;
+import com.example.koifishfengshui.model.entity.Account;
+import com.example.koifishfengshui.model.entity.User;
 import com.example.koifishfengshui.enums.Status;
-import com.example.koifishfengshui.exception.DuplicateEntity;
+import com.example.koifishfengshui.exception.EntityNotFoundException;
+import com.example.koifishfengshui.repository.AccountRepository;
 import com.example.koifishfengshui.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -20,32 +19,54 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private AccountRepository accountRepository;
 
-    public User registerUser(UserRegistrationDTO registerRequestDTO) {
-        try {
-            User user = new User();
-            user.setUsername(registerRequestDTO.getUsername());
-            user.setEmail(registerRequestDTO.getEmail());
-            user.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
-            user.setRole(Role.CUSTOMER); // Default role
-            user.setStatus(Status.ACTIVE); // Default status
-            user.setCreatedAt(LocalDateTime.now());
-            user.setUpdatedAt(LocalDateTime.now());
+    public List<User> getAllUsers(Status status) {
+        return userRepository.findByStatus(status);
+    }
 
-            return userRepository.save(user);
-        } catch (Exception e) {
-            // Log the exception details for debugging
-            System.out.println("Exception: " + e.getMessage());
-            throw new RuntimeException("Registration failed: " + e.getMessage());
+    // Update
+    public UpdateUserRequest updateUser(Long accountId, UpdateUserRequest updateUserDTO) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new EntityNotFoundException("Account not found"));
+
+        User user = account.getUser();
+
+        if (updateUserDTO.getFullName() != null) user.setFullName(updateUserDTO.getFullName());
+        if (updateUserDTO.getPhoneNumber() != null) user.setPhoneNumber(updateUserDTO.getPhoneNumber());
+        if (updateUserDTO.getBirthdate() != null) user.setBirthdate(updateUserDTO.getBirthdate());
+        if (updateUserDTO.getGender() != null) user.setGender(updateUserDTO.getGender());
+
+        userRepository.save(user);
+
+        if (updateUserDTO.getUsername() != null) account.setUsername(updateUserDTO.getUsername());
+        if (updateUserDTO.getEmail() != null) account.setEmail(updateUserDTO.getEmail());
+
+        accountRepository.save(account);
+
+        UpdateUserRequest updatedAccount = new UpdateUserRequest();
+
+        updatedAccount.setBirthdate(user.getBirthdate());
+        updatedAccount.setUsername(account.getUsername());
+        updatedAccount.setGender(user.getGender());
+        updatedAccount.setEmail(account.getEmail());
+        updatedAccount.setPhoneNumber(user.getPhoneNumber());
+        updatedAccount.setFullName(user.getFullName());
+
+        return updatedAccount;
+    }
+
+
+    public User deleteUser(long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Account account = user.getAccount();
+        if (account != null) {
+            account.setStatus(Status.INACTIVE);
+            accountRepository.save(account);
         }
-    }
-
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-    public boolean checkPassword(String rawPassword, String encodedPassword) {
-        return passwordEncoder.matches(rawPassword, encodedPassword);
+        user.setStatus(Status.INACTIVE);
+        return userRepository.save(user);
     }
 }

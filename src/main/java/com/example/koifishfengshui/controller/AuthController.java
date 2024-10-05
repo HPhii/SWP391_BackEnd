@@ -1,29 +1,39 @@
 package com.example.koifishfengshui.controller;
 
-import com.example.koifishfengshui.dto.UserRegistrationDTO;
-import com.example.koifishfengshui.dto.LoginRequestDTO;
-import com.example.koifishfengshui.entity.User;
-import com.example.koifishfengshui.service.UserService;
+import com.example.koifishfengshui.model.response.AccountResponse;
+import com.example.koifishfengshui.model.request.LoginRequest;
+import com.example.koifishfengshui.model.request.RegistrationRequest;
+import com.example.koifishfengshui.service.AccountService;
+import com.example.koifishfengshui.service.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
     @Autowired
-    private UserService userService;
+    private AccountService accountService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public ResponseEntity registerUser(@Valid @RequestBody UserRegistrationDTO userRegistrationDTO) {
+    public ResponseEntity registerUser(@Valid @RequestBody RegistrationRequest registrationDTO) {
         try {
-            User registeredUser = userService.registerUser(userRegistrationDTO);
-            return ResponseEntity.ok(registeredUser);
+            AccountResponse newAccount = authenticationService.register(registrationDTO);
+            return ResponseEntity.ok(newAccount);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -31,14 +41,23 @@ public class AuthController {
 
     // Login Endpoint
     @PostMapping("/login")
-    public ResponseEntity loginUser(@Valid @RequestBody LoginRequestDTO loginRequestDTO) {
-        Optional<User> userOptional = userService.findByEmail(loginRequestDTO.getEmail());
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (userService.checkPassword(loginRequestDTO.getPassword(), user.getPassword())) {
-                return ResponseEntity.ok("Login successful!");
-            }
+    public ResponseEntity loginUser(@Valid @RequestBody LoginRequest loginRequestDTO) {
+        AccountResponse account = authenticationService.login(loginRequestDTO);
+        return ResponseEntity.ok(account);
+    }
+
+//    @PostMapping("/login-google")
+//    private ResponseEntity checkLoginGoogle(@RequestBody LoginGoogleRequest loginGGRequest){
+//        AccountResponse accountResponse = authenticationService.loginGoogle(loginGGRequest);
+//        return ResponseEntity.ok(accountResponse);
+//    }
+
+    //Log out API
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+        if (authentication != null) {
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
-        return ResponseEntity.status(401).body("Invalid credentials");
+        return ResponseEntity.ok("Logout successful");
     }
 }

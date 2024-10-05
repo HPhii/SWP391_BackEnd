@@ -1,17 +1,15 @@
-package com.example.koifishfengshui.dto;
+package com.example.koifishfengshui.model.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequestDTO {
+@Data
+public class LoginRequest {
 
     @Email(message = "Please provide a valid email")
     @NotBlank(message = "Email cannot be blank")
