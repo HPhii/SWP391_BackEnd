@@ -1,6 +1,7 @@
 package com.example.koifishfengshui.model.entity;
 
 import com.example.koifishfengshui.enums.SubscriptionPriority;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,6 +17,7 @@ public class SubscriptionPlan {
     private Long planId;
 
     @OneToMany(mappedBy = "subscriptionPlan")
+    @JsonIgnore
     private List<Advertisement> advertisements;
 
     @Column(name = "plan_name", nullable = false, unique = true)

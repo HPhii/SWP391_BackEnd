@@ -1,6 +1,5 @@
 package com.example.koifishfengshui.model.entity;
 
-import com.example.koifishfengshui.enums.AdProductType;
 import com.example.koifishfengshui.enums.AdStatus;
 import com.example.koifishfengshui.enums.ProductType;
 import jakarta.persistence.*;

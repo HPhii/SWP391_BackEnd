@@ -42,9 +42,6 @@ public class User {
     @JsonIgnore
     private Account account;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Consultation> consultations;
-
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Blog> blogs;

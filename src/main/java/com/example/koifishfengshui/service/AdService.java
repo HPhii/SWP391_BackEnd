@@ -181,8 +181,8 @@ public class AdService {
 
         // Manually map fields to avoid ModelMapper ambiguity
         response.setAdId(ad.getAdId());
-        response.setProductName(ad.getProductName());  // Use Advertisement's productName
-        response.setProductType(ad.getProductType());  // Use Advertisement's productType
+        response.setProductName(ad.getProductName());
+        response.setProductType(ad.getProductType());
         response.setDescription(ad.getDescription());
         response.setPrice(ad.getPrice());
         response.setImageUrl(ad.getImageUrl());
@@ -192,8 +192,7 @@ public class AdService {
         response.setClicksCount(ad.getClicksCount());
         response.setCreatedAt(ad.getCreatedAt());
 
-        // Set custom fields
-        response.setUserName(ad.getUser().getFullName());  // Custom mapping for user's full name
+        response.setUserName(ad.getUser().getFullName());
 
         return response;
     }

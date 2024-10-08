@@ -1,6 +1,5 @@
 package com.example.koifishfengshui.model.entity;
 
-import com.example.koifishfengshui.enums.Fate;
 import com.example.koifishfengshui.enums.ProductType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -28,8 +27,8 @@ public class FengShuiProduct {
     @Column(nullable = false)
     private ProductType type;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "compatible_fate", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "compatible_fate_id", nullable = false)
     private Fate compatibleFate;
 
     @Column(nullable = false)
@@ -41,3 +40,4 @@ public class FengShuiProduct {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 }
+

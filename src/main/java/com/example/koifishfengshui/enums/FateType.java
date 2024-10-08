@@ -1,6 +1,6 @@
 package com.example.koifishfengshui.enums;
 
-public enum Fate {
+public enum FateType {
     METAL,
     WOOD,
     WATER,

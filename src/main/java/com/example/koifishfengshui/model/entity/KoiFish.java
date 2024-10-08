@@ -1,11 +1,8 @@
 package com.example.koifishfengshui.model.entity;
 
-import com.example.koifishfengshui.enums.Fate;
 import com.example.koifishfengshui.enums.KoiSize;
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 @Entity
@@ -29,8 +26,8 @@ public class KoiFish {
     @Column(nullable = false)
     private double price;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "compatible_fate_id", nullable = false)
     private Fate compatibleFate;
 
     @Column(nullable = false)
@@ -41,8 +38,6 @@ public class KoiFish {
 
     @Column(name = "color_fate")
     private String colorFate;
-
-    @OneToMany(mappedBy = "recommendedKoi")
-    private List<Consultation> consultations;
 }
+
 

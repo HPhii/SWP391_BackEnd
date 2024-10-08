@@ -1,6 +1,6 @@
 package com.example.koifishfengshui.model.request;
 
-import com.example.koifishfengshui.enums.Fate;
+import com.example.koifishfengshui.enums.FateType;
 import com.example.koifishfengshui.enums.ProductType;
 import lombok.Data;
 
@@ -12,5 +12,5 @@ public class AdRequest {
     private Double price;
     private String imageUrl;
     private String contactInfo;
-    private Fate compatibleFate;
+    private FateType compatibleFate;
 }

@@ -5,6 +5,7 @@ import com.example.koifishfengshui.model.request.LoginRequest;
 import com.example.koifishfengshui.model.request.RegistrationRequest;
 import com.example.koifishfengshui.service.AccountService;
 import com.example.koifishfengshui.service.AuthenticationService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -13,14 +14,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin("*")
+@SecurityRequirement(name = "api")
 public class AuthController {
 
     @Autowired
