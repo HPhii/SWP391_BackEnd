@@ -56,24 +56,20 @@ public class CompatibilityService {
 
         double compatibilityRate = 0;
 
-        // Tương thích mệnh
         if (userFate.getFateType() == pondFate.getFateType()) {
             compatibilityRate += 0.6;
         }
 
-        // Tương thích hướng
         if (isDirectionCompatible(userFate.getFateType(), pond.getDirection())) {
             compatibilityRate += 0.1;
         }
 
-        // Tương thích hình dạng
         if (isShapeCompatible(userFate.getFateType(), pond.getShape())) {
             compatibilityRate += 0.1;
         }
 
-        // Khắc mệnh
         if (userFate.getIncompatibleFates().contains(pondFate)) {
-            compatibilityRate -= 0.2; // Giảm độ tương thích nếu khắc mệnh
+            compatibilityRate -= 0.2;
         }
 
         return Math.max(0, Math.min(compatibilityRate, 1));
