@@ -33,9 +33,8 @@ public class FateCalculationService {
     }
 
     private int calculateChi(int year) {
-        int lastTwoDigits = year % 100;
-        int remainder = lastTwoDigits % 12;
-        return CHI_VALUES[remainder];
+        int chi = year % 12;
+        return CHI_VALUES[chi];
     }
 
     private FateType determineFate(int fateValue) {
