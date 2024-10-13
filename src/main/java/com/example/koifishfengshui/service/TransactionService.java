@@ -3,6 +3,7 @@ package com.example.koifishfengshui.service;
 import com.example.koifishfengshui.enums.PaymentMethod;
 import com.example.koifishfengshui.enums.PaymentStatus;
 import com.example.koifishfengshui.exception.EntityNotFoundException;
+import com.example.koifishfengshui.model.entity.Advertisement;
 import com.example.koifishfengshui.model.entity.TransactionHistory;
 import com.example.koifishfengshui.model.entity.User;
 import com.example.koifishfengshui.model.response.paged.PagedTransactionResponse;
@@ -22,9 +23,10 @@ public class TransactionService {
     private TransactionHistoryRepository transactionHistoryRepository;
 
     @Transactional
-    public TransactionHistory createTransaction(User user, Double amount) {
+    public TransactionHistory createTransaction(User user, Advertisement advertisement, Double amount) {
         TransactionHistory transaction = new TransactionHistory();
         transaction.setUser(user);
+        transaction.setAdvertisement(advertisement);
         transaction.setAmount(amount);
         transaction.setPaymentMethod(PaymentMethod.VNPAY);
         transaction.setPaymentStatus(PaymentStatus.PENDING);

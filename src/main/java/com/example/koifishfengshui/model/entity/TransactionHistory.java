@@ -23,6 +23,10 @@ public class TransactionHistory {
     @Column(nullable = false)
     private Double amount;
 
+    @ManyToOne
+    @JoinColumn(name = "ad_id", nullable = false)
+    private Advertisement advertisement;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod;
