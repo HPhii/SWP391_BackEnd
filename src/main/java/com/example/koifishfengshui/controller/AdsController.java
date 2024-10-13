@@ -7,6 +7,7 @@ import com.example.koifishfengshui.model.response.dto.AdResponse;
 import com.example.koifishfengshui.model.response.paged.PagedAdResponse;
 import com.example.koifishfengshui.service.AdService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -73,9 +74,9 @@ public class AdsController {
 
     // User selects a subscription plan for their ad
     @PostMapping("/{adId}/subscription")
-    public ResponseEntity<AdResponse> selectSubscriptionPlan(@PathVariable Long adId, @RequestBody SubscriptionPlanRequest planRequest, Authentication authentication) {
-        AdResponse adResponse = adService.selectSubscriptionPlan(adId, planRequest, authentication);
-        return ResponseEntity.ok(adResponse);
+    public ResponseEntity<String> selectSubscriptionPlan(@PathVariable Long adId, @RequestBody SubscriptionPlanRequest planRequest, Authentication authentication) throws Exception {
+        String paymentUrl = adService.selectSubscriptionPlan(adId, planRequest, authentication);
+        return ResponseEntity.ok(paymentUrl);
     }
 
     // User gives final approval for their ad
@@ -83,6 +84,27 @@ public class AdsController {
     public ResponseEntity<AdResponse> userFinalApproval(@PathVariable Long adId, Authentication authentication) {
         AdResponse adResponse = adService.userFinalApproval(adId, authentication);
         return ResponseEntity.ok(adResponse);
+    }
+
+    @GetMapping("/vn-pay-callback")
+    public ResponseEntity<String> payCallbackHandler(HttpServletRequest request) {
+        String status = request.getParameter("vnp_ResponseCode");
+        String txnRef = request.getParameter("vnp_TxnRef");
+
+        Long transactionId;
+        try {
+            transactionId = Long.parseLong(txnRef);
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body("Invalid transaction reference");
+        }
+
+        if ("00".equals(status)) {
+            adService.handlePaymentResponse(transactionId, true);
+            return ResponseEntity.ok("Payment successful");
+        } else {
+            adService.handlePaymentResponse(transactionId, false);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Payment failed");
+        }
     }
 }
 

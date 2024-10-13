@@ -31,7 +31,8 @@ public class Filter extends OncePerRequestFilter {
             "/api/auth/register",
             "/api/auth/login",
             "/api/password/forgot",
-            "/api/password/reset"
+            "/api/password/reset",
+            "/api/ads/vn-pay-callback"
     );
 
     @Autowired

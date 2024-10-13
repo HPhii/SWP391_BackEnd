@@ -52,6 +52,8 @@ public class AdService {
     private TransactionService transactionService;
 
     @Autowired
+    private TransactionHistoryRepository transactionRepository;
+    @Autowired
     private ModelMapper modelMapper;
 
     @Transactional
@@ -159,55 +161,53 @@ public class AdService {
 
 
     @Transactional
-    public AdResponse selectSubscriptionPlan(Long adId, SubscriptionPlanRequest planRequest, Authentication authentication) {
+    public String selectSubscriptionPlan(Long adId, SubscriptionPlanRequest planRequest, Authentication authentication) throws Exception {
         Advertisement ad = adRepository.findById(adId)
                 .orElseThrow(() -> new EntityNotFoundException("Ads not found"));
 
         if (ad.getStatus() != AdStatus.APPROVED) {
-            throw new IllegalStateException("You cannot select a subscription plan until the ads is approved by admin.");
+            throw new IllegalStateException("You cannot select a subscription plan until the ad is approved by admin.");
         }
 
-        // Find the selected subscription plan
         SubscriptionPlan plan = planRepository.findById(planRequest.getPlanId())
                 .orElseThrow(() -> new EntityNotFoundException("Invalid subscription plan"));
 
-        // Link the ad with the subscription plan
         ad.setSubscriptionPlan(plan);
-//        ad.setStatus(AdStatus.PENDING_PAYMENT);
-        ad.setStatus(AdStatus.QUEUED_FOR_POST);
+        ad.setStatus(AdStatus.PENDING_PAYMENT);
         adRepository.save(ad);
 
-        // Log the status change
-//        logAdStatusChange(ad, AdStatus.PENDING_PAYMENT, ad.getUser());
-        logAdStatusChange(ad, AdStatus.QUEUED_FOR_POST, ad.getUser());
+        logAdStatusChange(ad, AdStatus.PENDING_PAYMENT, ad.getUser());
 
-        TransactionHistory transaction = transactionService.createTransaction(ad.getUser(), plan.getPrice());
+        TransactionHistory transaction = transactionService.createTransaction(ad.getUser(), ad, plan.getPrice());
+        String paymentUrl = paymentService.createUrl(transaction, plan);
 
-        // Gọi service thanh toán để thực hiện thanh toán
-        boolean paymentSuccess = paymentService.processPayment(ad, plan, ((Account) authentication.getPrincipal()).getUser());
-
-//        if (paymentSuccess) {
-//            // Nếu thanh toán thành công, chuyển trạng thái sang QUEUED_FOR_POST
-//            ad.setStatus(AdStatus.QUEUED_FOR_POST);
-//            adRepository.save(ad);
-//
-//            transactionService.updateTransactionStatus(transaction.getTransactionId(), PaymentStatus.SUCCESS);
-//
-//            // Log status change
-//            logAdStatusChange(ad, AdStatus.QUEUED_FOR_POST, ad.getUser());
-//        } else {
-//            // Nếu thanh toán thất bại, chuyển trạng thái sang PAYMENT_FAILED
-//            ad.setStatus(AdStatus.PAYMENT_FAILED);
-//            adRepository.save(ad);
-//
-//            transactionService.updateTransactionStatus(transaction.getTransactionId(), PaymentStatus.FAILED);
-//
-//            // Log status change
-//            logAdStatusChange(ad, AdStatus.PAYMENT_FAILED, ad.getUser());
-//        }
-
-        return mapToAdResponse(ad);
+        return paymentUrl;
     }
+
+
+    public void handlePaymentResponse(Long transactionId, boolean success) {
+        TransactionHistory transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
+
+        Advertisement ad = transaction.getAdvertisement();
+
+        if (success) {
+            transaction.setPaymentStatus(PaymentStatus.SUCCESS);
+            ad.setStatus(AdStatus.QUEUED_FOR_POST);
+        } else {
+            transaction.setPaymentStatus(PaymentStatus.FAILED);
+            ad.setStatus(AdStatus.PAYMENT_FAILED);
+        }
+
+        // Lưu trạng thái mới của quảng cáo và transaction
+        adRepository.save(ad);
+        transactionRepository.save(transaction);
+
+        // Log thay đổi trạng thái
+        logAdStatusChange(ad, ad.getStatus(), ad.getUser());
+    }
+
+
 
     @Transactional
     public AdResponse userFinalApproval(Long adId, Authentication authentication) {
