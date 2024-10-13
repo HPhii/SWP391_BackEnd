@@ -18,28 +18,29 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @PostMapping("/createCategory")
+    @PostMapping
     public ResponseEntity<Category> createCategory(@RequestBody Category category) {
         Category createdCategory = categoryService.createCategory(category);
         return ResponseEntity.ok(createdCategory);
     }
 
-    @GetMapping("/getAll")
+    @GetMapping
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
 
-    @GetMapping("/findOrCreate")
+    @GetMapping("/search")
     public ResponseEntity<Category> findOrCreateCategory(@RequestParam String categoryName) {
         Category category = categoryService.findOrCreateCategory(categoryName);
         return ResponseEntity.ok(category);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity deleteCategoryById(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCategoryById(@PathVariable Long id) {
         categoryService.deleteCategoryById(id);
-        return ResponseEntity.ok("Delete success!!!");
+        return ResponseEntity.ok("Category deleted successfully.");
     }
 }
+
 

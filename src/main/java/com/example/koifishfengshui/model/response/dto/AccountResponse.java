@@ -1,4 +1,4 @@
-package com.example.koifishfengshui.model.response;
+package com.example.koifishfengshui.model.response.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;

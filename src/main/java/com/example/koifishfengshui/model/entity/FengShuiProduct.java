@@ -20,24 +20,24 @@ public class FengShuiProduct {
     @JsonIgnore
     private List<Advertisement> advertisements;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private ProductType type;
 
     @ManyToOne
-    @JoinColumn(name = "compatible_fate_id", nullable = false)
+    @JoinColumn(name = "compatible_fate_id")
     private Fate compatibleFate;
 
-    @Column(nullable = false)
+    @Column
     private Double price;
 
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 }
 

@@ -1,8 +1,8 @@
 package com.example.koifishfengshui.service;
 
 import com.example.koifishfengshui.model.request.ForgotPasswordRequest;
-import com.example.koifishfengshui.model.response.AccountResponse;
-import com.example.koifishfengshui.model.response.EmailDetails;
+import com.example.koifishfengshui.model.response.dto.AccountResponse;
+import com.example.koifishfengshui.model.response.dto.EmailDetails;
 import com.example.koifishfengshui.model.entity.Account;
 import com.example.koifishfengshui.enums.LoginProvider;
 import com.example.koifishfengshui.enums.Status;

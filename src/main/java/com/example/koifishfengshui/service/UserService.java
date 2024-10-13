@@ -5,10 +5,14 @@ import com.example.koifishfengshui.model.entity.Account;
 import com.example.koifishfengshui.model.entity.User;
 import com.example.koifishfengshui.enums.Status;
 import com.example.koifishfengshui.exception.EntityNotFoundException;
+import com.example.koifishfengshui.model.response.paged.PagedUserResponse;
 import com.example.koifishfengshui.repository.AccountRepository;
 import com.example.koifishfengshui.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,8 +25,18 @@ public class UserService {
     @Autowired
     private AccountRepository accountRepository;
 
-    public List<User> getAllUsers(Status status) {
-        return userRepository.findByStatus(status);
+    // Service
+    @Transactional
+    public PagedUserResponse getAllUsers(Status status, Pageable pageable) {
+        Page<User> userPage = userRepository.findByStatus(status, pageable);
+        List<User> users = userPage.getContent();
+
+        return new PagedUserResponse(
+                users,
+                userPage.getTotalElements(),
+                userPage.getTotalPages(),
+                pageable.getPageNumber()
+        );
     }
 
     // Update

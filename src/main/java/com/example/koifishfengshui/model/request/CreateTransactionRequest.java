@@ -4,6 +4,8 @@ import com.example.koifishfengshui.enums.PaymentMethod;
 import lombok.Data;
 
 @Data
-public class SubscriptionPlanRequest {
-    private Long planId;
+public class CreateTransactionRequest {
+    private Double amount;
+    private PaymentMethod paymentMethod;
 }
+

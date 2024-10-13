@@ -1,16 +1,16 @@
 package com.example.koifishfengshui.controller;
 
-import com.example.koifishfengshui.model.request.UpdateUserRequest;
-import com.example.koifishfengshui.model.entity.User;
 import com.example.koifishfengshui.enums.Status;
+import com.example.koifishfengshui.model.request.UpdateUserRequest;
+import com.example.koifishfengshui.model.response.paged.PagedUserResponse;
 import com.example.koifishfengshui.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -23,9 +23,14 @@ public class UserController {
     //get current user list
     // api/user/ => GET
     @GetMapping
-    public ResponseEntity getAllActiveUsers(@RequestParam Status status) {
-        List<User> users = userService.getAllUsers(status);
-        return ResponseEntity.ok(users);
+    public ResponseEntity<PagedUserResponse> getAllActiveUsers(
+            @RequestParam Status status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        PagedUserResponse response = userService.getAllUsers(status, pageable);
+        return ResponseEntity.ok(response);
     }
 
 //    @PutMapping("{userId}")

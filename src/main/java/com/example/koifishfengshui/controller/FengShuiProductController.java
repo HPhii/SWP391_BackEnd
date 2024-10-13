@@ -1,13 +1,14 @@
 package com.example.koifishfengshui.controller;
 
 import com.example.koifishfengshui.model.entity.FengShuiProduct;
+import com.example.koifishfengshui.model.response.paged.PagedProductResponse;
 import com.example.koifishfengshui.service.FengShuiProductService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -27,9 +28,13 @@ public class FengShuiProductController {
 
     // Get all products
     @GetMapping
-    public ResponseEntity<List<FengShuiProduct>> getAllProducts() {
-        List<FengShuiProduct> products = productService.getAllProducts();
-        return ResponseEntity.ok(products);
+    public ResponseEntity<PagedProductResponse> getAllProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        PagedProductResponse response = productService.getAllProducts(pageable);
+        return ResponseEntity.ok(response);
     }
 
     // Get product by ID

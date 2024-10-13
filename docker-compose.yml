@@ -10,7 +10,7 @@ services:
       - "3307:3306"
 
   app:
-    image: hieuphi/koifengshui:v3
+    image: hieuphi/koifengshui:v4
     container_name: springboot_container
     environment:
       MYSQL_URL: "jdbc:mysql://mysql_container:3306/koifengshui"
