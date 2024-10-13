@@ -1,4 +1,4 @@
-package com.example.koifishfengshui.model.response;
+package com.example.koifishfengshui.model.response.dto;
 
 import com.example.koifishfengshui.model.entity.Account;
 import lombok.Data;

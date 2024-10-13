@@ -1,4 +1,4 @@
-package com.example.koifishfengshui.model.response;
+package com.example.koifishfengshui.model.response.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;

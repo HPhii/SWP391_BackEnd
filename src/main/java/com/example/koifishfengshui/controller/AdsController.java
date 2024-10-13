@@ -3,16 +3,18 @@ package com.example.koifishfengshui.controller;
 import com.example.koifishfengshui.enums.AdStatus;
 import com.example.koifishfengshui.model.request.AdRequest;
 import com.example.koifishfengshui.model.request.SubscriptionPlanRequest;
-import com.example.koifishfengshui.model.response.AdResponse;
+import com.example.koifishfengshui.model.response.dto.AdResponse;
+import com.example.koifishfengshui.model.response.paged.PagedAdResponse;
 import com.example.koifishfengshui.service.AdService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/ads")
@@ -23,33 +25,61 @@ public class AdsController {
     @Autowired
     private AdService adService;
 
+    // Create a new advertisement
     @PostMapping
     public ResponseEntity<AdResponse> createAd(@RequestBody AdRequest adRequest, Authentication authentication) {
         AdResponse adResponse = adService.createAd(adRequest, authentication);
-        return ResponseEntity.ok(adResponse);
+        return new ResponseEntity<>(adResponse, HttpStatus.CREATED);
     }
 
-    @GetMapping("/my-ads")
-    public ResponseEntity<List<AdResponse>> getUserAds(Authentication authentication) {
-        List<AdResponse> ads = adService.getUserAds(authentication);
-        return ResponseEntity.ok(ads);
+    // Get ads of the authenticated user
+    @GetMapping("/my")
+    public ResponseEntity<PagedAdResponse> getUserAds(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        PagedAdResponse response = adService.getUserAds(authentication, pageable);
+
+        return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{adId}/approve")
+    @GetMapping
+    public ResponseEntity<PagedAdResponse> getAllAds(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        PagedAdResponse response = adService.getAllAds(pageable);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Admin approves or rejects an advertisement
+    @PutMapping("/{adId}/status")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<AdResponse> approveAd(@PathVariable Long adId, @RequestParam AdStatus status, Authentication authentication) {
+    public ResponseEntity<AdResponse> updateAdStatus(@PathVariable Long adId, @RequestParam AdStatus status, Authentication authentication) {
         AdResponse adResponse = adService.updateAdStatus(adId, status, authentication);
         return ResponseEntity.ok(adResponse);
     }
 
-
-    @PostMapping("/{adId}/select-plan")
-    public ResponseEntity<AdResponse> selectSubscriptionPlan(@PathVariable Long adId, @RequestBody SubscriptionPlanRequest planRequest, Authentication authentication) {
-        AdResponse adResponse = adService.selectSubscriptionPlan(adId, planRequest, authentication );
+    // Update a rejected advertisement
+    @PutMapping("/{adId}")
+    public ResponseEntity<AdResponse> updateRejectedAd(@PathVariable Long adId, @RequestBody AdRequest adRequest, Authentication authentication) {
+        AdResponse adResponse = adService.updateAds(adId, adRequest, authentication);
         return ResponseEntity.ok(adResponse);
     }
 
-    @PutMapping("/{adId}/final-approval")
+    // User selects a subscription plan for their ad
+    @PostMapping("/{adId}/subscription")
+    public ResponseEntity<AdResponse> selectSubscriptionPlan(@PathVariable Long adId, @RequestBody SubscriptionPlanRequest planRequest, Authentication authentication) {
+        AdResponse adResponse = adService.selectSubscriptionPlan(adId, planRequest, authentication);
+        return ResponseEntity.ok(adResponse);
+    }
+
+    // User gives final approval for their ad
+    @PutMapping("/{adId}/approval")
     public ResponseEntity<AdResponse> userFinalApproval(@PathVariable Long adId, Authentication authentication) {
         AdResponse adResponse = adService.userFinalApproval(adId, authentication);
         return ResponseEntity.ok(adResponse);

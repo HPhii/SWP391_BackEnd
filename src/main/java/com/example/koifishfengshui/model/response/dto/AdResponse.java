@@ -1,4 +1,4 @@
-package com.example.koifishfengshui.model.response;
+package com.example.koifishfengshui.model.response.dto;
 
 import com.example.koifishfengshui.enums.AdStatus;
 import com.example.koifishfengshui.enums.ProductType;
@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdResponse {
-
     private Long adId;
     private String productName;
     private ProductType productType;

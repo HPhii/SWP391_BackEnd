@@ -1,18 +1,23 @@
 package com.example.koifishfengshui.service;
 
 import com.example.koifishfengshui.enums.AdStatus;
+import com.example.koifishfengshui.enums.PaymentStatus;
 import com.example.koifishfengshui.exception.EntityNotFoundException;
 import com.example.koifishfengshui.model.entity.*;
 import com.example.koifishfengshui.model.request.AdRequest;
 import com.example.koifishfengshui.model.request.SubscriptionPlanRequest;
-import com.example.koifishfengshui.model.response.AdResponse;
+import com.example.koifishfengshui.model.response.dto.AdResponse;
+import com.example.koifishfengshui.model.response.paged.PagedAdResponse;
 import com.example.koifishfengshui.repository.*;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,11 +49,13 @@ public class AdService {
     private FengShuiProductRepository fengShuiProductRepository;
 
     @Autowired
+    private TransactionService transactionService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Transactional
     public AdResponse createAd(AdRequest adRequest, Authentication authentication) {
-        // Get the current user
         Account account = (Account) authentication.getPrincipal();
         User user = account.getUser();
 
@@ -58,7 +65,6 @@ public class AdService {
         adRepository.save(ad);
 
         logAdStatusChange(ad, AdStatus.PENDING, user);
-
         return mapToAdResponse(ad);
     }
 
@@ -76,15 +82,66 @@ public class AdService {
         return ad;
     }
 
+    @Transactional
+    public AdResponse updateAds(Long adId, AdRequest adRequest, Authentication authentication) {
+        Advertisement ad = adRepository.findById(adId)
+                .orElseThrow(() -> new EntityNotFoundException("Ads not found"));
 
-    public List<AdResponse> getUserAds(Authentication authentication) {
-        // Get the current user
+        if (ad.getStatus() == AdStatus.PUBLISHED || ad.getStatus() == AdStatus.QUEUED_FOR_POST || ad.getStatus() == AdStatus.PENDING_PAYMENT || ad.getStatus() == AdStatus.PAYMENT_FAILED) {
+            throw new IllegalStateException("Your ads are in " + ad.getStatus() + "status, cannot edit!!!");
+        }
+
+        if (adRequest.getProductName() != null) ad.setProductName(adRequest.getProductName());
+        if (adRequest.getProductType() != null) ad.setProductType(adRequest.getProductType());
+        if (adRequest.getDescription() != null) ad.setDescription(adRequest.getDescription());
+        if (adRequest.getPrice() != null) ad.setPrice(adRequest.getPrice());
+        if (adRequest.getImageUrl() != null) ad.setImageUrl(adRequest.getImageUrl());
+        if (adRequest.getContactInfo() != null) ad.setContactInfo(adRequest.getContactInfo());
+
+        ad.setStatus(AdStatus.PENDING);
+        ad.setUpdatedAt(LocalDateTime.now());
+
+        FengShuiProduct updatedProduct = fengShuiProductService.createProductFromAdRequest(adRequest);
+        ad.setProduct(updatedProduct);
+
+        adRepository.save(ad);
+        logAdStatusChange(ad, AdStatus.PENDING, ((Account) authentication.getPrincipal()).getUser());
+        return mapToAdResponse(ad);
+    }
+
+    public PagedAdResponse getUserAds(Authentication authentication, Pageable pageable) {
         Account account = (Account) authentication.getPrincipal();
         User user = account.getUser();
 
-        // Retrieve ads by user
-        List<Advertisement> ads = adRepository.findByUserUser(user.getUser());
-        return ads.stream().map(this::mapToAdResponse).collect(Collectors.toList());
+        Page<Advertisement> adsPage = adRepository.findByUserUser(user.getUser(), pageable);
+
+        List<AdResponse> adResponses = adsPage.getContent()
+                .stream()
+                .map(this::mapToAdResponse)
+                .collect(Collectors.toList());
+
+        return new PagedAdResponse(
+                adResponses,
+                adsPage.getTotalElements(),
+                adsPage.getTotalPages(),
+                pageable.getPageNumber()
+        );
+    }
+
+    public PagedAdResponse getAllAds(Pageable pageable) {
+        Page<Advertisement> adsPage = adRepository.findAll(pageable);
+
+        List<AdResponse> adResponses = adsPage.getContent()
+                .stream()
+                .map(this::mapToAdResponse)
+                .collect(Collectors.toList());
+
+        return new PagedAdResponse(
+                adResponses,
+                adsPage.getTotalElements(),
+                adsPage.getTotalPages(),
+                pageable.getPageNumber()
+        );
     }
 
     @Transactional
@@ -95,7 +152,6 @@ public class AdService {
         ad.setStatus(status);
         adRepository.save(ad);
 
-        // Ghi log thay đổi trạng thái quảng cáo
         logAdStatusChange(ad, status, ((Account) authentication.getPrincipal()).getUser());
 
         return mapToAdResponse(ad);
@@ -104,7 +160,6 @@ public class AdService {
 
     @Transactional
     public AdResponse selectSubscriptionPlan(Long adId, SubscriptionPlanRequest planRequest, Authentication authentication) {
-        // Find the ad
         Advertisement ad = adRepository.findById(adId)
                 .orElseThrow(() -> new EntityNotFoundException("Ads not found"));
 
@@ -126,13 +181,17 @@ public class AdService {
 //        logAdStatusChange(ad, AdStatus.PENDING_PAYMENT, ad.getUser());
         logAdStatusChange(ad, AdStatus.QUEUED_FOR_POST, ad.getUser());
 
-//        // Gọi service thanh toán để thực hiện thanh toán
-//        boolean paymentSuccess = paymentService.processPayment(ad, plan, ((Account) authentication.getPrincipal()).getUser());
-//
+        TransactionHistory transaction = transactionService.createTransaction(ad.getUser(), plan.getPrice());
+
+        // Gọi service thanh toán để thực hiện thanh toán
+        boolean paymentSuccess = paymentService.processPayment(ad, plan, ((Account) authentication.getPrincipal()).getUser());
+
 //        if (paymentSuccess) {
 //            // Nếu thanh toán thành công, chuyển trạng thái sang QUEUED_FOR_POST
 //            ad.setStatus(AdStatus.QUEUED_FOR_POST);
 //            adRepository.save(ad);
+//
+//            transactionService.updateTransactionStatus(transaction.getTransactionId(), PaymentStatus.SUCCESS);
 //
 //            // Log status change
 //            logAdStatusChange(ad, AdStatus.QUEUED_FOR_POST, ad.getUser());
@@ -140,6 +199,8 @@ public class AdService {
 //            // Nếu thanh toán thất bại, chuyển trạng thái sang PAYMENT_FAILED
 //            ad.setStatus(AdStatus.PAYMENT_FAILED);
 //            adRepository.save(ad);
+//
+//            transactionService.updateTransactionStatus(transaction.getTransactionId(), PaymentStatus.FAILED);
 //
 //            // Log status change
 //            logAdStatusChange(ad, AdStatus.PAYMENT_FAILED, ad.getUser());
@@ -179,7 +240,6 @@ public class AdService {
     private AdResponse mapToAdResponse(Advertisement ad) {
         AdResponse response = new AdResponse();
 
-        // Manually map fields to avoid ModelMapper ambiguity
         response.setAdId(ad.getAdId());
         response.setProductName(ad.getProductName());
         response.setProductType(ad.getProductType());

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/consultation")
+@RequestMapping("/api/consultations")
 @CrossOrigin("*")
 @SecurityRequirement(name = "api")
 public class ConsultationController {
@@ -21,7 +21,7 @@ public class ConsultationController {
     @Autowired
     private ConsultationService consultationService;
 
-    @PostMapping("/get")
+    @PostMapping
     public ResponseEntity<Map<String, Object>> getConsultation(@RequestParam("fate") FateType userFate) {
         Fate userFateDetails = consultationService.getUserFate(userFate);
 
@@ -30,7 +30,7 @@ public class ConsultationController {
         List<Map<String, Object>> productResults = consultationService.getFengShuiProductRecommendations(userFate);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("Fate", userFateDetails);
+        response.put("fate", userFateDetails);
         response.put("koiRecommendations", koiResults);
         response.put("pondRecommendations", pondResults);
         response.put("productRecommendations", productResults);

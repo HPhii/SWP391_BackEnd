@@ -1,6 +1,6 @@
 package com.example.koifishfengshui.controller;
 
-import com.example.koifishfengshui.model.response.AccountResponse;
+import com.example.koifishfengshui.model.response.dto.AccountResponse;
 import com.example.koifishfengshui.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;

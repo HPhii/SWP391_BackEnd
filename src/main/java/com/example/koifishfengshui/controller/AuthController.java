@@ -1,6 +1,6 @@
 package com.example.koifishfengshui.controller;
 
-import com.example.koifishfengshui.model.response.AccountResponse;
+import com.example.koifishfengshui.model.response.dto.AccountResponse;
 import com.example.koifishfengshui.model.request.LoginRequest;
 import com.example.koifishfengshui.model.request.RegistrationRequest;
 import com.example.koifishfengshui.service.AccountService;
