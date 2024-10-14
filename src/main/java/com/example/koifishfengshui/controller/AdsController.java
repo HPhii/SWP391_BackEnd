@@ -46,7 +46,7 @@ public class AdsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<PagedAdResponse> getAllAds(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size) {
@@ -55,6 +55,29 @@ public class AdsController {
         PagedAdResponse response = adService.getAllAds(pageable);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<PagedAdResponse> getActiveAds(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        PagedAdResponse response = adService.getActiveAds(pageable);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/status")
+    public ResponseEntity<PagedAdResponse> getAdsByStatus(
+            @RequestParam AdStatus status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        PagedAdResponse response = adService.getAdsByStatus(status, pageable);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // Admin approves or rejects an advertisement

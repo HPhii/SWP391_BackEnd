@@ -2,7 +2,6 @@ package com.example.koifishfengshui.service;
 
 import com.example.koifishfengshui.enums.PaymentMethod;
 import com.example.koifishfengshui.enums.PaymentStatus;
-import com.example.koifishfengshui.exception.EntityNotFoundException;
 import com.example.koifishfengshui.model.entity.Advertisement;
 import com.example.koifishfengshui.model.entity.TransactionHistory;
 import com.example.koifishfengshui.model.entity.User;
@@ -44,14 +43,6 @@ public class TransactionService {
                 transactionPage.getTotalPages(),
                 pageable.getPageNumber()
         );
-    }
-
-    @Transactional
-    public void updateTransactionStatus(Long transactionId, PaymentStatus paymentStatus) {
-        TransactionHistory transaction = transactionHistoryRepository.findById(transactionId)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
-        transaction.setPaymentStatus(paymentStatus);
-        transactionHistoryRepository.save(transaction);
     }
 }
 

@@ -29,9 +29,6 @@ public class SubscriptionPlan {
     @Column(nullable = false)
     private Integer duration;
 
-    @Column(name = "max_ads", nullable = false)
-    private Integer maxAds;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "ad_placement_priority", nullable = false)
     private SubscriptionPriority adPlacementPriority;
