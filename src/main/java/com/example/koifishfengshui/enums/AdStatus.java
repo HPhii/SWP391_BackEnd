@@ -3,8 +3,8 @@ package com.example.koifishfengshui.enums;
 public enum AdStatus {
     PENDING,
     APPROVED,
-    PENDING_PAYMENT,   // Quảng cáo đang chờ thanh toán
-    PAYMENT_FAILED,    // Thanh toán thất bại
+    PENDING_PAYMENT,
+    PAYMENT_FAILED,
     QUEUED_FOR_POST,
     PUBLISHED,
     REJECTED
