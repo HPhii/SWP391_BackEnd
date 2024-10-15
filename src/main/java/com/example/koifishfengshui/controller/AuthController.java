@@ -52,12 +52,12 @@ public class AuthController {
 //        return ResponseEntity.ok(accountResponse);
 //    }
 
-    //Log out API
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        if (authentication != null) {
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
-        }
-        return ResponseEntity.ok("Logout successful");
-    }
+//    //Log out API
+//    @PostMapping("/logout")
+//    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+//        if (authentication != null) {
+//            new SecurityContextLogoutHandler().logout(request, response, authentication);
+//        }
+//        return ResponseEntity.ok("Logout successful");
+//    }
 }

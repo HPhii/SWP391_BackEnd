@@ -2,6 +2,7 @@ package com.example.koifishfengshui.controller;
 
 import com.example.koifishfengshui.model.request.ForgotPasswordRequest;
 import com.example.koifishfengshui.service.AccountService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/password")
+@CrossOrigin("*")
+@SecurityRequirement(name = "api")
 public class PasswordController {
     @Autowired
     private AccountService accountService;

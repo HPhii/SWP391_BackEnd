@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,7 @@ public class AdService {
     private ModelMapper modelMapper;
 
     private static final String CONFIRMATION_TEMPLATE = "order-confirmation-template";
+
     @Transactional
     public AdResponse createAd(AdRequest adRequest, Authentication authentication) {
         Account account = (Account) authentication.getPrincipal();
@@ -187,6 +189,12 @@ public class AdService {
         );
     }
 
+    public AdResponse getAdById(Long adId) {
+        Advertisement ad = adRepository.findById(adId)
+                .orElseThrow(() -> new EntityNotFoundException("Ad not found"));
+
+        return mapToAdResponse(ad);
+    }
 
     @Transactional
     public AdResponse updateAdStatus(Long adId, AdStatus status, Authentication authentication) {
@@ -237,7 +245,6 @@ public class AdService {
             case PUBLISHED:
                 throw new IllegalStateException("The ad has been published. Changing subscription plans is not allowed.");
             case APPROVED:
-                // Valid state for subscription plan selection
                 break;
             default:
                 throw new IllegalStateException("Unexpected ad status. Please contact support.");
@@ -245,7 +252,29 @@ public class AdService {
     }
 
 
-    public void handlePaymentResponse(Long transactionId, boolean success) {
+//    public void handlePaymentResponse(Long transactionId, boolean success) {
+//        TransactionHistory transaction = transactionRepository.findById(transactionId)
+//                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
+//
+//        Advertisement ad = transaction.getAdvertisement();
+//
+//        if (success) {
+//            transaction.setPaymentStatus(PaymentStatus.SUCCESS);
+//            ad.setStatus(AdStatus.QUEUED_FOR_POST);
+//
+//            sendOrderConfirmationEmail(transaction);
+//        } else {
+//            transaction.setPaymentStatus(PaymentStatus.FAILED);
+//            ad.setStatus(AdStatus.PAYMENT_FAILED);
+//        }
+//
+//        adRepository.save(ad);
+//        transactionRepository.save(transaction);
+//
+//        logAdStatusChange(ad, ad.getStatus(), ad.getUser());
+//    }
+
+    public Advertisement handlePaymentResponse(Long transactionId, boolean success) {
         TransactionHistory transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
 
@@ -265,6 +294,8 @@ public class AdService {
         transactionRepository.save(transaction);
 
         logAdStatusChange(ad, ad.getStatus(), ad.getUser());
+
+        return ad;
     }
 
     private void sendOrderConfirmationEmail(TransactionHistory transaction) {
@@ -292,7 +323,9 @@ public class AdService {
         if (ad.getStatus() != AdStatus.QUEUED_FOR_POST) {
             throw new IllegalStateException("Ads is not ready for user approval.");
         }
-
+        ad.setStartDate(LocalDateTime.now());
+        ad.setDurationInDays(ad.getSubscriptionPlan().getDuration());
+        ad.setEndDate(ad.getStartDate().plusDays(ad.getDurationInDays()));
         ad.setStatus(AdStatus.PUBLISHED);
         adRepository.save(ad);
 
@@ -320,11 +353,13 @@ public class AdService {
         response.setImageUrl(ad.getImageUrl());
         response.setContactInfo(ad.getContactInfo());
         response.setStatus(ad.getStatus());
-        response.setViewsCount(ad.getViewsCount());
-        response.setClicksCount(ad.getClicksCount());
         response.setCreatedAt(ad.getCreatedAt());
-
         response.setUserName(ad.getUser().getFullName());
+        if (ad.getEndDate() != null) {
+            response.setDaysLeft(Duration.between(LocalDateTime.now(), ad.getEndDate()).toDays());
+        } else {
+            response.setDaysLeft(0L);
+        }
 
         return response;
     }

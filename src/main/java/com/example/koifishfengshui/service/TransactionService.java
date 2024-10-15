@@ -2,9 +2,11 @@ package com.example.koifishfengshui.service;
 
 import com.example.koifishfengshui.enums.PaymentMethod;
 import com.example.koifishfengshui.enums.PaymentStatus;
+import com.example.koifishfengshui.exception.EntityNotFoundException;
 import com.example.koifishfengshui.model.entity.Advertisement;
 import com.example.koifishfengshui.model.entity.TransactionHistory;
 import com.example.koifishfengshui.model.entity.User;
+import com.example.koifishfengshui.model.response.dto.TransactionHistoryResponse;
 import com.example.koifishfengshui.model.response.paged.PagedTransactionResponse;
 import com.example.koifishfengshui.repository.TransactionHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -35,14 +38,38 @@ public class TransactionService {
     @Transactional
     public PagedTransactionResponse getAllTransactions(Pageable pageable) {
         Page<TransactionHistory> transactionPage = transactionHistoryRepository.findAll(pageable);
-        List<TransactionHistory> transactions = transactionPage.getContent();
+        List<TransactionHistoryResponse> transactionResponses = transactionPage.getContent().stream()
+                .map(transaction -> new TransactionHistoryResponse(
+                        transaction.getTransactionId(),
+                        transaction.getUser().getFullName(),
+                        transaction.getAmount(),
+                        transaction.getPaymentMethod(),
+                        transaction.getPaymentStatus(),
+                        transaction.getTransactionDate()
+                )).collect(Collectors.toList());
 
         return new PagedTransactionResponse(
-                transactions,
+                transactionResponses,
                 transactionPage.getTotalElements(),
                 transactionPage.getTotalPages(),
                 pageable.getPageNumber()
         );
     }
+
+    @Transactional
+    public TransactionHistoryResponse getTransactionById(Long transactionId) {
+        TransactionHistory transaction = transactionHistoryRepository.findById(transactionId)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
+
+        return new TransactionHistoryResponse(
+                transaction.getTransactionId(),
+                transaction.getUser().getFullName(),
+                transaction.getAmount(),
+                transaction.getPaymentMethod(),
+                transaction.getPaymentStatus(),
+                transaction.getTransactionDate()
+        );
+    }
+
 }
 

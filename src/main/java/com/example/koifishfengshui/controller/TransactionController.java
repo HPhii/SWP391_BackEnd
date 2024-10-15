@@ -1,5 +1,6 @@
 package com.example.koifishfengshui.controller;
 
+import com.example.koifishfengshui.model.response.dto.TransactionHistoryResponse;
 import com.example.koifishfengshui.model.response.paged.PagedTransactionResponse;
 import com.example.koifishfengshui.service.TransactionService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -26,6 +27,12 @@ public class TransactionController {
         Pageable pageable = PageRequest.of(page, size);
         PagedTransactionResponse response = transactionService.getAllTransactions(pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<TransactionHistoryResponse> getTransactionById(@PathVariable Long transactionId) {
+        TransactionHistoryResponse transactionResponse = transactionService.getTransactionById(transactionId);
+        return ResponseEntity.ok(transactionResponse);
     }
 }
 

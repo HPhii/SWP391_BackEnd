@@ -22,6 +22,4 @@ public class Category {
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private List<Blog> blogs = new ArrayList<>();
-
-
 }
