@@ -1,6 +1,7 @@
 package com.example.koifishfengshui.controller;
 
 import com.example.koifishfengshui.enums.AdStatus;
+import com.example.koifishfengshui.model.entity.Advertisement;
 import com.example.koifishfengshui.model.request.AdRequest;
 import com.example.koifishfengshui.model.request.SubscriptionPlanRequest;
 import com.example.koifishfengshui.model.response.dto.AdResponse;
@@ -16,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ads")
@@ -80,6 +84,12 @@ public class AdsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/{adId}")
+    public ResponseEntity<AdResponse> getAdById(@PathVariable Long adId) {
+        AdResponse adResponse = adService.getAdById(adId);
+        return ResponseEntity.ok(adResponse);
+    }
+
     // Admin approves or rejects an advertisement
     @PutMapping("/{adId}/status")
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -110,7 +120,7 @@ public class AdsController {
     }
 
     @GetMapping("/vn-pay-callback")
-    public ResponseEntity<String> payCallbackHandler(HttpServletRequest request) {
+    public ResponseEntity<Map<String, String>> payCallbackHandler(HttpServletRequest request) {
         String status = request.getParameter("vnp_ResponseCode");
         String txnRef = request.getParameter("vnp_TxnRef");
 
@@ -118,16 +128,21 @@ public class AdsController {
         try {
             transactionId = Long.parseLong(txnRef);
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body("Invalid transaction reference");
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid transaction reference"));
         }
 
         if ("00".equals(status)) {
-            adService.handlePaymentResponse(transactionId, true);
-            return ResponseEntity.ok("Payment successful");
+            Advertisement ad = adService.handlePaymentResponse(transactionId, true);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Payment successful");
+            response.put("redirectUrl", "/api/ads/" + ad.getAdId());
+            return ResponseEntity.ok(response);
         } else {
             adService.handlePaymentResponse(transactionId, false);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Payment failed");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Payment failed"));
         }
     }
+
+
 }
 

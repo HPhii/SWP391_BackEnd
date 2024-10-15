@@ -1,10 +1,11 @@
 package com.example.koifishfengshui.service;
 
-import com.example.koifishfengshui.model.request.UpdateUserRequest;
-import com.example.koifishfengshui.model.entity.Account;
-import com.example.koifishfengshui.model.entity.User;
 import com.example.koifishfengshui.enums.Status;
 import com.example.koifishfengshui.exception.EntityNotFoundException;
+import com.example.koifishfengshui.model.entity.Account;
+import com.example.koifishfengshui.model.entity.User;
+import com.example.koifishfengshui.model.request.UpdateUserRequest;
+import com.example.koifishfengshui.model.response.dto.UserProfileResponse;
 import com.example.koifishfengshui.model.response.paged.PagedUserResponse;
 import com.example.koifishfengshui.repository.AccountRepository;
 import com.example.koifishfengshui.repository.UserRepository;
@@ -25,7 +26,6 @@ public class UserService {
     @Autowired
     private AccountRepository accountRepository;
 
-    // Service
     @Transactional
     public PagedUserResponse getAllUsers(Status status, Pageable pageable) {
         Page<User> userPage = userRepository.findByStatus(status, pageable);
@@ -39,6 +39,27 @@ public class UserService {
         );
     }
 
+    @Transactional
+    public UserProfileResponse getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Account account = user.getAccount();
+        if (account == null) {
+            throw new EntityNotFoundException("Account not found for this user");
+        }
+
+        UserProfileResponse userProfileResponse = new UserProfileResponse();
+        userProfileResponse.setEmail(account.getEmail());
+        userProfileResponse.setUserId(userId);
+        userProfileResponse.setBirthdate(user.getBirthdate());
+        userProfileResponse.setGender(user.getGender());
+        userProfileResponse.setPhoneNumber(user.getPhoneNumber());
+        userProfileResponse.setFullName(user.getFullName());
+
+        return userProfileResponse;
+    }
+
     // Update
     public UpdateUserRequest updateUser(Long accountId, UpdateUserRequest updateUserDTO) {
         Account account = accountRepository.findById(accountId)
@@ -50,6 +71,8 @@ public class UserService {
         if (updateUserDTO.getPhoneNumber() != null) user.setPhoneNumber(updateUserDTO.getPhoneNumber());
         if (updateUserDTO.getBirthdate() != null) user.setBirthdate(updateUserDTO.getBirthdate());
         if (updateUserDTO.getGender() != null) user.setGender(updateUserDTO.getGender());
+        if (updateUserDTO.getUsername() != null) user.getAccount().setUsername(updateUserDTO.getUsername());
+        if (updateUserDTO.getEmail() != null) user.getAccount().setEmail(updateUserDTO.getEmail());
 
         userRepository.save(user);
 
@@ -61,9 +84,9 @@ public class UserService {
         UpdateUserRequest updatedAccount = new UpdateUserRequest();
 
         updatedAccount.setBirthdate(user.getBirthdate());
-        updatedAccount.setUsername(account.getUsername());
+        updatedAccount.setUsername(user.getAccount().getUsername());
         updatedAccount.setGender(user.getGender());
-        updatedAccount.setEmail(account.getEmail());
+        updatedAccount.setEmail(user.getAccount().getEmail());
         updatedAccount.setPhoneNumber(user.getPhoneNumber());
         updatedAccount.setFullName(user.getFullName());
 

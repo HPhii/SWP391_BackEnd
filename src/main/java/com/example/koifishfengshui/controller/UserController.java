@@ -2,6 +2,7 @@ package com.example.koifishfengshui.controller;
 
 import com.example.koifishfengshui.enums.Status;
 import com.example.koifishfengshui.model.request.UpdateUserRequest;
+import com.example.koifishfengshui.model.response.dto.UserProfileResponse;
 import com.example.koifishfengshui.model.response.paged.PagedUserResponse;
 import com.example.koifishfengshui.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,6 +32,12 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size);
         PagedUserResponse response = userService.getAllUsers(status, pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long userId) {
+        UserProfileResponse userProfile = userService.getUserProfile(userId);
+        return ResponseEntity.ok(userProfile);
     }
 
 //    @PutMapping("{userId}")

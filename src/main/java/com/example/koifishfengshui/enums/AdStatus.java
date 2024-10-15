@@ -7,5 +7,6 @@ public enum AdStatus {
     PAYMENT_FAILED,
     QUEUED_FOR_POST,
     PUBLISHED,
-    REJECTED
+    REJECTED,
+    EXPIRED
 }

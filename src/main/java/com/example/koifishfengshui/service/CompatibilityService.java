@@ -34,79 +34,16 @@ public class CompatibilityService {
         this.fateRepository = fateRepository;
     }
 
-//    public double calculateKoiCompatibility(FateType userFateType, KoiFish koi) {
-//        Fate userFate = fateRepository.findByFateType(userFateType)
-//                .orElseThrow(() -> new EntityNotFoundException("Fate not found!"));
-//        Fate koiFate = koi.getCompatibleFate();
-//
-//        double compatibilityRate = 0;
-//
-//        if (userFate.getFateType() == koiFate.getFateType()) {
-//            compatibilityRate += 0.6;
-//        }
-//
-//        if (userFate.getCompatibleColors().contains(koi.getColor())) {
-//            compatibilityRate += 0.2;
-//        } else if (userFate.getIncompatibleColors().contains(koi.getColor())) {
-//            compatibilityRate -= 0.1;
-//        }
-//
-//        if (isSizeCompatible(userFate.getFateType(), koi.getSize())) {
-//            compatibilityRate += 0.1;
-//        }
-//
-//        if (userFate.getIncompatibleFates().contains(koiFate)) {
-//            compatibilityRate -= 0.2;
-//        }
-//
-//        return Math.max(0, Math.min(compatibilityRate, 1));
-//    }
-//
-//    public double calculatePondCompatibility(FateType userFateType, PondFeature pond) {
-//        Fate userFate = fateRepository.findByFateType(userFateType)
-//                .orElseThrow(() -> new EntityNotFoundException("Fate not found!"));
-//        Fate pondFate = pond.getCompatibleFate();
-//
-//        double compatibilityRate = 0;
-//
-//        if (userFate.getFateType() == pondFate.getFateType()) {
-//            compatibilityRate += 0.6;
-//        }
-//
-//        if (isDirectionCompatible(userFate.getFateType(), pond.getDirection())) {
-//            compatibilityRate += 0.1;
-//        }
-//
-//        if (isShapeCompatible(userFate.getFateType(), pond.getShape())) {
-//            compatibilityRate += 0.1;
-//        }
-//
-//        if (userFate.getIncompatibleFates().contains(pondFate)) {
-//            compatibilityRate -= 0.2;
-//        }
-//
-//        return Math.max(0, Math.min(compatibilityRate, 1));
-//    }
-
-    private double calculateBaseCompatibility(Fate userFate, Fate targetFate, double sameFateBonus) {
-        double compatibilityRate = 0;
-
-        if (userFate.getFateType() == targetFate.getFateType()) {
-            compatibilityRate += sameFateBonus;
-        }
-
-        if (userFate.getIncompatibleFates().contains(targetFate)) {
-            compatibilityRate -= 0.2;
-        }
-
-        return compatibilityRate;
-    }
-
     public double calculateKoiCompatibility(FateType userFateType, KoiFish koi) {
         Fate userFate = fateRepository.findByFateType(userFateType)
                 .orElseThrow(() -> new EntityNotFoundException("Fate not found!"));
+        Fate koiFate = koi.getCompatibleFate();
 
-        double compatibilityRate = calculateBaseCompatibility(userFate, koi.getCompatibleFate(), 0.6);
+        double compatibilityRate = 0;
+
+        if (userFate.getFateType() == koiFate.getFateType()) {
+            compatibilityRate += 0.6;
+        }
 
         if (userFate.getCompatibleColors().contains(koi.getColor())) {
             compatibilityRate += 0.2;
@@ -118,14 +55,23 @@ public class CompatibilityService {
             compatibilityRate += 0.1;
         }
 
+        if (userFate.getIncompatibleFates().contains(koiFate)) {
+            compatibilityRate -= 0.2;
+        }
+
         return Math.max(0, Math.min(compatibilityRate, 1));
     }
 
     public double calculatePondCompatibility(FateType userFateType, PondFeature pond) {
         Fate userFate = fateRepository.findByFateType(userFateType)
                 .orElseThrow(() -> new EntityNotFoundException("Fate not found!"));
+        Fate pondFate = pond.getCompatibleFate();
 
-        double compatibilityRate = calculateBaseCompatibility(userFate, pond.getCompatibleFate(), 0.6);
+        double compatibilityRate = 0;
+
+        if (userFate.getFateType() == pondFate.getFateType()) {
+            compatibilityRate += 0.6;
+        }
 
         if (isDirectionCompatible(userFate.getFateType(), pond.getDirection())) {
             compatibilityRate += 0.1;
@@ -135,8 +81,62 @@ public class CompatibilityService {
             compatibilityRate += 0.1;
         }
 
+        if (userFate.getIncompatibleFates().contains(pondFate)) {
+            compatibilityRate -= 0.2;
+        }
+
         return Math.max(0, Math.min(compatibilityRate, 1));
     }
+
+//    private double calculateBaseCompatibility(Fate userFate, Fate targetFate, double sameFateBonus) {
+//        double compatibilityRate = 0;
+//
+//        if (userFate.getFateType() == targetFate.getFateType()) {
+//            compatibilityRate += sameFateBonus;
+//        }
+//
+//        if (userFate.getIncompatibleFates().contains(targetFate)) {
+//            compatibilityRate -= 0.2;
+//        }
+//
+//        return compatibilityRate;
+//    }
+//
+//    public double calculateKoiCompatibility(FateType userFateType, KoiFish koi) {
+//        Fate userFate = fateRepository.findByFateType(userFateType)
+//                .orElseThrow(() -> new EntityNotFoundException("Fate not found!"));
+//
+//        double compatibilityRate = calculateBaseCompatibility(userFate, koi.getCompatibleFate(), 0.6);
+//
+//        if (userFate.getCompatibleColors().contains(koi.getColor())) {
+//            compatibilityRate += 0.2;
+//        } else if (userFate.getIncompatibleColors().contains(koi.getColor())) {
+//            compatibilityRate -= 0.1;
+//        }
+//
+//        if (isSizeCompatible(userFate.getFateType(), koi.getSize())) {
+//            compatibilityRate += 0.1;
+//        }
+//
+//        return Math.max(0, Math.min(compatibilityRate, 1));
+//    }
+//
+//    public double calculatePondCompatibility(FateType userFateType, PondFeature pond) {
+//        Fate userFate = fateRepository.findByFateType(userFateType)
+//                .orElseThrow(() -> new EntityNotFoundException("Fate not found!"));
+//
+//        double compatibilityRate = calculateBaseCompatibility(userFate, pond.getCompatibleFate(), 0.6);
+//
+//        if (isDirectionCompatible(userFate.getFateType(), pond.getDirection())) {
+//            compatibilityRate += 0.1;
+//        }
+//
+//        if (isShapeCompatible(userFate.getFateType(), pond.getShape())) {
+//            compatibilityRate += 0.1;
+//        }
+//
+//        return Math.max(0, Math.min(compatibilityRate, 1));
+//    }
 
     public double calculateProductCompatibility(FateType userFate, FengShuiProduct product) {
         double compatibilityRate = 0;
@@ -165,26 +165,26 @@ public class CompatibilityService {
         }
     }
 
-//    private boolean isDirectionCompatible(FateType userFate, PondDirection direction) {
-//        switch (userFate) {
-//            case METAL:
-//                return direction == PondDirection.NORTHWEST || direction == PondDirection.NORTH || direction == PondDirection.SOUTHEAST;
-//            case WOOD:
-//                return direction == PondDirection.NORTH || direction == PondDirection.EAST || direction == PondDirection.SOUTH || direction == PondDirection.SOUTHEAST;
-//            case WATER:
-//                return direction == PondDirection.NORTH || direction == PondDirection.SOUTHEAST;
-//            case FIRE:
-//                return direction == PondDirection.SOUTH || direction == PondDirection.SOUTHWEST || direction == PondDirection.NORTHEAST;
-//            case EARTH:
-//                return direction == PondDirection.SOUTHWEST || direction == PondDirection.NORTHEAST;
-//            default:
-//                return false;
-//        }
-//    }
-
     private boolean isDirectionCompatible(FateType userFate, PondDirection direction) {
-        return directionCompatibilityMap.getOrDefault(userFate, Set.of()).contains(direction);
+        switch (userFate) {
+            case METAL:
+                return direction == PondDirection.NORTHWEST || direction == PondDirection.NORTH || direction == PondDirection.SOUTHEAST;
+            case WOOD:
+                return direction == PondDirection.NORTH || direction == PondDirection.EAST || direction == PondDirection.SOUTH || direction == PondDirection.SOUTHEAST;
+            case WATER:
+                return direction == PondDirection.NORTH || direction == PondDirection.SOUTHEAST;
+            case FIRE:
+                return direction == PondDirection.SOUTH || direction == PondDirection.SOUTHWEST || direction == PondDirection.NORTHEAST;
+            case EARTH:
+                return direction == PondDirection.SOUTHWEST || direction == PondDirection.NORTHEAST;
+            default:
+                return false;
+        }
     }
+
+//    private boolean isDirectionCompatible(FateType userFate, PondDirection direction) {
+//        return directionCompatibilityMap.getOrDefault(userFate, Set.of()).contains(direction);
+//    }
 
     private boolean isShapeCompatible(FateType userFate, PondShape shape) {
         switch (userFate) {

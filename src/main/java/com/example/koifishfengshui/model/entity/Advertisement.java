@@ -51,17 +51,20 @@ public class Advertisement {
     @Column(nullable = false)
     private AdStatus status;
 
-    @Column(name = "views_count", nullable = false)
-    private Integer viewsCount = 0;
-
-    @Column(name = "clicks_count", nullable = false)
-    private Integer clicksCount = 0;
-
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+
+    @Column(name = "duration_in_days")
+    private Integer durationInDays;
 
     @PrePersist
     protected void onCreate() {

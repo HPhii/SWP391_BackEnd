@@ -20,9 +20,8 @@ public class AdResponse {
     private String imageUrl;
     private String contactInfo;
     private AdStatus status;
-    private Integer viewsCount;
-    private Integer clicksCount;
     private LocalDateTime createdAt;
     private String userName;
+    private long daysLeft;
 }
 
