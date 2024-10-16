@@ -232,6 +232,9 @@ public class AdService {
 
     private void validateAdStatusForSubscription(Advertisement ad) {
         switch (ad.getStatus()) {
+            case APPROVED:
+            case EXPIRED:
+                break;
             case PENDING:
                 throw new IllegalStateException("The ad is still pending approval. Please wait for admin approval.");
             case REJECTED:
@@ -244,35 +247,11 @@ public class AdService {
                 throw new IllegalStateException("The ad is queued for posting. You cannot change the subscription plan now.");
             case PUBLISHED:
                 throw new IllegalStateException("The ad has been published. Changing subscription plans is not allowed.");
-            case APPROVED:
-                break;
             default:
                 throw new IllegalStateException("Unexpected ad status. Please contact support.");
         }
     }
 
-
-//    public void handlePaymentResponse(Long transactionId, boolean success) {
-//        TransactionHistory transaction = transactionRepository.findById(transactionId)
-//                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
-//
-//        Advertisement ad = transaction.getAdvertisement();
-//
-//        if (success) {
-//            transaction.setPaymentStatus(PaymentStatus.SUCCESS);
-//            ad.setStatus(AdStatus.QUEUED_FOR_POST);
-//
-//            sendOrderConfirmationEmail(transaction);
-//        } else {
-//            transaction.setPaymentStatus(PaymentStatus.FAILED);
-//            ad.setStatus(AdStatus.PAYMENT_FAILED);
-//        }
-//
-//        adRepository.save(ad);
-//        transactionRepository.save(transaction);
-//
-//        logAdStatusChange(ad, ad.getStatus(), ad.getUser());
-//    }
 
     public Advertisement handlePaymentResponse(Long transactionId, boolean success) {
         TransactionHistory transaction = transactionRepository.findById(transactionId)
@@ -334,6 +313,30 @@ public class AdService {
         return mapToAdResponse(ad);
     }
 
+    @Transactional
+    public String renewAd(Long adId) throws Exception {
+        Advertisement ad = adRepository.findById(adId)
+                .orElseThrow(() -> new EntityNotFoundException("Ads not found"));
+
+        if (ad.getStatus() != AdStatus.EXPIRED) {
+            throw new IllegalStateException("This ads has not expired yet and cannot be renewed.");
+        }
+
+        SubscriptionPlan currentPlan = ad.getSubscriptionPlan();
+
+        TransactionHistory transaction = transactionService.createTransaction(ad.getUser(), ad, currentPlan.getPrice());
+        String paymentUrl = paymentService.createUrl(transaction, currentPlan);
+
+        ad.setStatus(AdStatus.PENDING_PAYMENT);
+        ad.setStartDate(null);
+        ad.setEndDate(null);
+        adRepository.save(ad);
+
+        logAdStatusChange(ad, AdStatus.PENDING_PAYMENT, ad.getUser());
+
+        return paymentUrl;
+    }
+
     private void logAdStatusChange(Advertisement ad, AdStatus status, User user) {
         AdStatusLog log = new AdStatusLog();
         log.setAdvertisement(ad);
@@ -360,7 +363,6 @@ public class AdService {
         } else {
             response.setDaysLeft(0L);
         }
-
         return response;
     }
 

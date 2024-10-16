@@ -119,6 +119,12 @@ public class AdsController {
         return ResponseEntity.ok(adResponse);
     }
 
+    @PutMapping("/{adId}/renew")
+    public ResponseEntity<String> renewAd(@PathVariable Long adId) throws Exception {
+        String paymentUrl = adService.renewAd(adId);
+        return ResponseEntity.ok(paymentUrl);
+    }
+
     @GetMapping("/vn-pay-callback")
     public ResponseEntity<Map<String, String>> payCallbackHandler(HttpServletRequest request) {
         String status = request.getParameter("vnp_ResponseCode");
@@ -142,7 +148,5 @@ public class AdsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Payment failed"));
         }
     }
-
-
 }
 
