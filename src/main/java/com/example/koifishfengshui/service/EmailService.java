@@ -20,13 +20,6 @@ public class EmailService {
     @Autowired
     JavaMailSender mailSender;
 
-    /**
-     * General method to send emails with custom templates and dynamic data.
-     *
-     * @param emailDetails    The email details including receiver and subject.
-     * @param templateName    The name of the Thymeleaf template to use.
-     * @param contextVariables Map of dynamic variables to set in the email template.
-     */
     public void sendMail(EmailDetails emailDetails, String templateName, Map<String, Object> contextVariables) {
         try {
             // Create the context for Thymeleaf template

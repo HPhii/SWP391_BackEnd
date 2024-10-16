@@ -1,5 +1,6 @@
 package com.example.koifishfengshui.service;
 
+import com.example.koifishfengshui.exception.AuthException;
 import com.example.koifishfengshui.model.entity.Account;
 import com.example.koifishfengshui.repository.AccountRepository;
 import io.jsonwebtoken.Claims;
@@ -10,12 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class TokenService {
 
-    public final String SECRET_KEY = "hieuphinehehe070520030937874259hieuphinehehe";
+    private final String SECRET_KEY = "hieuphinehehe070520030937874259hieuphinehehe";
+    private final Map<String, LocalDateTime> tokenBlacklist = new ConcurrentHashMap<>();
 
     @Autowired
     private AccountRepository accountRepository;
@@ -38,6 +43,10 @@ public class TokenService {
 
     //Verify Token
     public Account getAccountByToken(String token) {
+        if (isTokenBlacklisted(token)) {
+            throw new AuthException("Token has been invalidated!");
+        }
+
         Claims claims = Jwts.parser()
                 .verifyWith(getSignKey())
                 .build()
@@ -48,6 +57,15 @@ public class TokenService {
         long id = Long.parseLong(idString);
 
         return accountRepository.findAccountById(id);
+    }
+
+    public void invalidateToken(String token) {
+        // Blacklist the token with its expiry time.
+        tokenBlacklist.put(token, LocalDateTime.now().plusHours(1)); // Optional: token lifespan.
+    }
+
+    private boolean isTokenBlacklisted(String token) {
+        return tokenBlacklist.containsKey(token);
     }
 }
 

@@ -1,7 +1,7 @@
 package com.example.koifishfengshui.config;
 
-import com.example.koifishfengshui.model.entity.Account;
 import com.example.koifishfengshui.exception.AuthException;
+import com.example.koifishfengshui.model.entity.Account;
 import com.example.koifishfengshui.service.TokenService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -52,54 +52,47 @@ public class Filter extends OncePerRequestFilter {
         return AUTH_PERMISSION.stream().anyMatch(pattern -> pathMatcher.match(pattern, uri));
     }
 
-    private String getToken(HttpServletRequest request) {
+    public String getToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null) return null;
         return authHeader.substring(7);
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // Kiểm tra trước khi cho phép truy cập vào controller
-        // check xem API mà ng dùng yêu cầu có phải là public API hay không?
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         boolean isPublicAPI = checkIsPublicAPI(request.getRequestURI());
         if (isPublicAPI) {
             filterChain.doFilter(request, response);
-        } else {
-            String token = getToken(request);
-            if (token == null) {
-                // cant access to this API
-                handlerExceptionResolver.resolveException(request, response, null, new AuthException("Empty Token!!!"));
-                return;
-            }
+            return;
+        }
 
-            // => có token
-            // check xem token có đúng hay không -> lấy account's inf từ token
-            Account account;
-            try {
-                account = tokenService.getAccountByToken(token);
-            } catch (ExpiredJwtException e) {
-                // response token expired
-                handlerExceptionResolver.resolveException(request, response, null, new AuthException("Expired Token!!!"));
-                return;
-            } catch (MalformedJwtException malformedJwtException) {
-                // response invalid token
-                handlerExceptionResolver.resolveException(request, response, null, new AuthException("Invalid Token!!!"));
-                return;
-            }
-            // token juan -> can access API
-            //store account to SecurityContextHolder to help Controller identify Account
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    account,
-                    token,
-                    account.getAuthorities()
-            );
+        String token = getToken(request);
+        if (token == null) {
+            handlerExceptionResolver.resolveException(request, response, null,
+                    new AuthException("Empty Token!!!"));
+            return;
+        }
 
+        try {
+            Account account = tokenService.getAccountByToken(token);
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(account, token, account.getAuthorities());
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response); // Tiếp tục xử lý nếu token hợp lệ.
+        } catch (AuthException e) { // Thêm bắt AuthException để xử lý token bị blacklist.
+            handlerExceptionResolver.resolveException(request, response, null, e);
+        } catch (ExpiredJwtException e) {
+            handlerExceptionResolver.resolveException(request, response, null,
+                    new AuthException("Expired Token!!!"));
+        } catch (MalformedJwtException malformedJwtException) {
+            handlerExceptionResolver.resolveException(request, response, null,
+                    new AuthException("Invalid Token!!!"));
         }
     }
+
+
 }
 

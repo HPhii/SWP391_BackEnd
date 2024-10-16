@@ -1,10 +1,12 @@
 package com.example.koifishfengshui.controller;
 
+import com.example.koifishfengshui.config.Filter;
 import com.example.koifishfengshui.model.response.dto.AccountResponse;
 import com.example.koifishfengshui.model.request.LoginRequest;
 import com.example.koifishfengshui.model.request.RegistrationRequest;
 import com.example.koifishfengshui.service.AccountService;
 import com.example.koifishfengshui.service.AuthenticationService;
+import com.example.koifishfengshui.service.TokenService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -29,6 +31,12 @@ public class AuthController {
     @Autowired
     private AuthenticationService authenticationService;
 
+    @Autowired
+    private Filter filter;
+
+    @Autowired
+    private TokenService tokenService;
+
     @PostMapping("/register")
     public ResponseEntity registerUser(@Valid @RequestBody RegistrationRequest registrationDTO) {
         try {
@@ -52,12 +60,14 @@ public class AuthController {
 //        return ResponseEntity.ok(accountResponse);
 //    }
 
-//    //Log out API
-//    @PostMapping("/logout")
-//    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-//        if (authentication != null) {
-//            new SecurityContextLogoutHandler().logout(request, response, authentication);
-//        }
-//        return ResponseEntity.ok("Logout successful");
-//    }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String token = filter.getToken(request); // Reuse your existing method to extract the token.
+        if (token != null) {
+            tokenService.invalidateToken(token); // Add logic to blacklist the token.
+            return ResponseEntity.ok("Logged out successfully.");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request or token missing.");
+    }
+
 }
