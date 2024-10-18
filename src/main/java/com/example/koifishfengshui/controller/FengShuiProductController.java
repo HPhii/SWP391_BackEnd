@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +21,8 @@ public class FengShuiProductController {
     private FengShuiProductService productService;
 
     // Create or update product
-    @PostMapping
-    public ResponseEntity<FengShuiProduct> createOrUpdateProduct(@RequestBody FengShuiProduct product) {
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<FengShuiProduct> createOrUpdateProduct(@ModelAttribute FengShuiProduct product) {
         FengShuiProduct savedProduct = productService.saveOrUpdateProduct(product);
         return ResponseEntity.ok(savedProduct);
     }

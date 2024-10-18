@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +46,9 @@ public class BlogService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     private static final String ADMIN = "ADMIN";
 
     @Transactional
@@ -58,6 +62,16 @@ public class BlogService {
 
         blog.setStatus(ADMIN.equals(authorAccount.getRole()) ? BlogStatus.APPROVED : BlogStatus.PENDING);
         blog.setCreatedAt(LocalDateTime.now());
+
+        if (blogRequest.getThumbnail() != null && !blogRequest.getThumbnail().isEmpty()) {
+            String thumbnailUrl = cloudinaryService.uploadImage(blogRequest.getThumbnail());
+            blog.setThumbnail(thumbnailUrl);
+        }
+
+        if (blogRequest.getImageFile() != null && !blogRequest.getImageFile().isEmpty()) {
+            String imageUrl = cloudinaryService.uploadImage(blogRequest.getImageFile());
+            blog.setImageUrl(imageUrl);
+        }
 
         Category category = categoryService.findOrCreateCategory(blogRequest.getCategoryName());
         blog.setCategory(category);
@@ -75,12 +89,21 @@ public class BlogService {
                 .orElseThrow(() -> new EntityNotFoundException("Blog not found"));
 
         if (blogRequest.getTitle() != null) existingBlog.setTitle(blogRequest.getTitle());
-        if (blogRequest.getThumbnail() != null) existingBlog.setThumbnail(blogRequest.getThumbnail());
+        if (blogRequest.getThumbnail() != null && !blogRequest.getThumbnail().isEmpty()) {
+            String thumbnailUrl = cloudinaryService.uploadImage(blogRequest.getThumbnail());
+            existingBlog.setThumbnail(thumbnailUrl);
+        }
         if (blogRequest.getContent() != null) existingBlog.setContent(blogRequest.getContent());
         if (blogRequest.getShortDescription() != null) existingBlog.setShortDescription(blogRequest.getShortDescription());
-        if (blogRequest.getImageUrl() != null) existingBlog.setImageUrl(blogRequest.getImageUrl());
+        if (blogRequest.getImageFile() != null && !blogRequest.getImageFile().isEmpty()) {
+            String imageUrl = cloudinaryService.uploadImage(blogRequest.getImageFile());
+            existingBlog.setImageUrl(imageUrl);
+        }
         if (blogRequest.getTags() != null) existingBlog.setTags(blogRequest.getTags());
-        if (blogRequest.getCategoryName() != null) existingBlog.getCategory().setCategoryName(blogRequest.getCategoryName());
+        if (blogRequest.getCategoryName() != null) {
+            Category category = categoryService.findOrCreateCategory(blogRequest.getCategoryName());
+            existingBlog.setCategory(category);
+        }
 
         Blog updatedBlog = blogRepository.save(existingBlog);
         return mapToBlogResponse(updatedBlog);

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,15 +26,20 @@ public class KoiFishService {
     @Autowired
     private FateRepository fateRepository;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     public KoiFishResponse createKoiFish(KoiFishRequest requestDTO) {
+        Map uploadResult = cloudinaryService.upload(requestDTO.getImageFile());
+        String imageUrl = (String) uploadResult.get("secure_url");
+
         KoiFish koiFish = new KoiFish();
         koiFish.setSpecies(requestDTO.getSpecies());
         koiFish.setColor(requestDTO.getColor());
         koiFish.setSize(requestDTO.getSize());
         koiFish.setPrice(requestDTO.getPrice());
-        koiFish.setImageUrl(requestDTO.getImageUrl());
+        koiFish.setImageUrl(imageUrl);
         koiFish.setDescription(requestDTO.getDescription());
-//        koiFish.setColorFate(requestDTO.getColorFate());
 
         Fate fate = fateRepository.findByFateType(requestDTO.getCompatibleFateType())
                 .orElseThrow(() -> new RuntimeException("Fate not found"));
@@ -48,11 +54,14 @@ public class KoiFishService {
         KoiFish koiFish = koiFishRepository.findById(koiId)
                 .orElseThrow(() -> new RuntimeException("KoiFish not found"));
 
+        Map uploadResult = cloudinaryService.upload(requestDTO.getImageFile());
+        String imageUrl = (String) uploadResult.get("secure_url");
+
         if (requestDTO.getSpecies() != null) koiFish.setSpecies(requestDTO.getSpecies());
         if (requestDTO.getColor() != null) koiFish.setColor(requestDTO.getColor());
         if (requestDTO.getSize() != null) koiFish.setSize(requestDTO.getSize());
         if (requestDTO.getPrice() == 0) koiFish.setPrice(requestDTO.getPrice());
-        if (requestDTO.getImageUrl() != null) koiFish.setImageUrl(requestDTO.getImageUrl());
+        if (imageUrl != null) koiFish.setImageUrl(imageUrl);
         if (requestDTO.getDescription() != null) koiFish.setDescription(requestDTO.getDescription());
 
         Fate fate = fateRepository.findByFateType(requestDTO.getCompatibleFateType())

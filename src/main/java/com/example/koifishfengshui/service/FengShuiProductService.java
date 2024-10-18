@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -25,7 +26,13 @@ public class FengShuiProductService {
     @Autowired
     private FateRepository fateRepository;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
     public FengShuiProduct createProductFromAdRequest(AdRequest adRequest) {
+        Map uploadResult = cloudinaryService.upload(adRequest.getImageFile());
+        String imageUrl = (String) uploadResult.get("secure_url");
+
         FengShuiProduct product = new FengShuiProduct();
         product.setName(adRequest.getProductName());
         product.setType(adRequest.getProductType());
@@ -36,7 +43,7 @@ public class FengShuiProductService {
         product.setCompatibleFate(compatibleFate);
 
         product.setPrice(adRequest.getPrice());
-        product.setImageUrl(adRequest.getImageUrl());
+        product.setImageUrl(imageUrl);
         product.setDescription(adRequest.getDescription());
 
         return saveOrUpdateProduct(product);
