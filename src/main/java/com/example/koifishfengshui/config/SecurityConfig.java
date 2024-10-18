@@ -1,5 +1,6 @@
 package com.example.koifishfengshui.config;
 
+import com.cloudinary.Cloudinary;
 import com.example.koifishfengshui.service.AuthenticationService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableMethodSecurity
@@ -39,6 +43,16 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public Cloudinary getCloudinary(){
+        Map config = new HashMap();
+        config.put("cloud_name", "dg0dwfewe");
+        config.put("api_key", "455981336253128");
+        config.put("api_secret", "2hggg5_hioqXjN4HuvPVWKTWcFA");
+        config.put("secure", true);
+        return new Cloudinary(config);
     }
 
     @Bean

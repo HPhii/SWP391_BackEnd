@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +22,8 @@ public class KoiFishController {
     @Autowired
     private KoiFishService koiFishService;
 
-    @PostMapping
-    public ResponseEntity<KoiFishResponse> createKoiFish(@RequestBody KoiFishRequest koiFishRequest) {
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<KoiFishResponse> createKoiFish(@ModelAttribute KoiFishRequest koiFishRequest) {
         KoiFishResponse koiFishResponse = koiFishService.createKoiFish(koiFishRequest);
         return new ResponseEntity<>(koiFishResponse, HttpStatus.CREATED);
     }

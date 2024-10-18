@@ -1,9 +1,9 @@
 package com.example.koifishfengshui.controller;
 
 
+import com.example.koifishfengshui.enums.BlogStatus;
 import com.example.koifishfengshui.model.request.BlogRequest;
 import com.example.koifishfengshui.model.response.dto.BlogResponse;
-import com.example.koifishfengshui.enums.BlogStatus;
 import com.example.koifishfengshui.model.response.paged.PagedBlogResponse;
 import com.example.koifishfengshui.service.BlogService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -27,15 +28,14 @@ public class BlogController {
     private BlogService blogService;
 
     // Create a new blog post
-    @PostMapping
-    public ResponseEntity<BlogResponse> createBlog(@Valid @RequestBody BlogRequest blogRequest, Authentication authentication) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BlogResponse> createBlog(@Valid BlogRequest blogRequest, Authentication authentication) {
         BlogResponse newBlog = blogService.createBlog(blogRequest, authentication);
         return new ResponseEntity<>(newBlog, HttpStatus.CREATED);
     }
 
-    // Update an existing blog post
-    @PutMapping("/{blogId}")
-    public ResponseEntity<BlogResponse> updateBlog(@PathVariable Long blogId, @Valid @RequestBody BlogRequest blogRequest) {
+    @PutMapping(value = "/{blogId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BlogResponse> updateBlog(@PathVariable Long blogId, @Valid BlogRequest blogRequest) {
         BlogResponse updatedBlog = blogService.updateBlog(blogId, blogRequest);
         return ResponseEntity.ok(updatedBlog);
     }

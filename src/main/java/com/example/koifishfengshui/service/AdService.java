@@ -64,6 +64,10 @@ public class AdService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+
     private static final String CONFIRMATION_TEMPLATE = "order-confirmation-template";
 
     @Transactional
@@ -80,14 +84,17 @@ public class AdService {
         return mapToAdResponse(ad);
     }
 
-    private static Advertisement createAdFromRequest(AdRequest adRequest, User user, FengShuiProduct product) {
+    private Advertisement createAdFromRequest(AdRequest adRequest, User user, FengShuiProduct product) {
+        Map uploadResult = cloudinaryService.upload(adRequest.getImageFile());
+        String imageUrl = (String) uploadResult.get("secure_url");
+
         Advertisement ad = new Advertisement();
         ad.setUser(user);
         ad.setProductName(adRequest.getProductName());
         ad.setProductType(adRequest.getProductType());
         ad.setDescription(adRequest.getDescription());
         ad.setPrice(adRequest.getPrice());
-        ad.setImageUrl(adRequest.getImageUrl());
+        ad.setImageUrl(imageUrl);
         ad.setContactInfo(adRequest.getContactInfo());
         ad.setProduct(product);
         ad.setStatus(AdStatus.PENDING);
@@ -103,11 +110,14 @@ public class AdService {
             throw new IllegalStateException("Your ads are in " + ad.getStatus() + "status, cannot edit!!!");
         }
 
+        Map uploadResult = cloudinaryService.upload(adRequest.getImageFile());
+        String imageUrl = (String) uploadResult.get("secure_url");
+
         if (adRequest.getProductName() != null) ad.setProductName(adRequest.getProductName());
         if (adRequest.getProductType() != null) ad.setProductType(adRequest.getProductType());
         if (adRequest.getDescription() != null) ad.setDescription(adRequest.getDescription());
         if (adRequest.getPrice() != null) ad.setPrice(adRequest.getPrice());
-        if (adRequest.getImageUrl() != null) ad.setImageUrl(adRequest.getImageUrl());
+        if (imageUrl != null) ad.setImageUrl(imageUrl);
         if (adRequest.getContactInfo() != null) ad.setContactInfo(adRequest.getContactInfo());
 
         ad.setStatus(AdStatus.PENDING);

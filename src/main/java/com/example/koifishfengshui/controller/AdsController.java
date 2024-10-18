@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,8 +32,8 @@ public class AdsController {
     private AdService adService;
 
     // Create a new advertisement
-    @PostMapping
-    public ResponseEntity<AdResponse> createAd(@RequestBody AdRequest adRequest, Authentication authentication) {
+    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<AdResponse> createAd(@ModelAttribute AdRequest adRequest, Authentication authentication) {
         AdResponse adResponse = adService.createAd(adRequest, authentication);
         return new ResponseEntity<>(adResponse, HttpStatus.CREATED);
     }
@@ -141,7 +142,7 @@ public class AdsController {
             Advertisement ad = adService.handlePaymentResponse(transactionId, true);
             Map<String, String> response = new HashMap<>();
             response.put("message", "Payment successful");
-            response.put("redirectUrl", "/api/ads/" + ad.getAdId());
+            response.put("redirectUrl", "http://localhost:5174/ads/" + ad.getAdId());
             return ResponseEntity.ok(response);
         } else {
             adService.handlePaymentResponse(transactionId, false);
