@@ -87,7 +87,7 @@ public class AuthController {
         try {
             String googleClientId = System.getenv("GOOGLE_CLIENT_ID");
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
-                    .setAudience(Collections.singletonList(googleClientId))
+                    .setAudience(Collections.singletonList("967281572671-up2oqffr8s9pf74m1gh83e3qjsqp15qd.apps.googleusercontent.com"))
                     .build();
 
             GoogleIdToken googleIdToken = verifier.verify(idToken);
@@ -101,7 +101,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Google login failed.");
         }
     }
-
-
-
 }

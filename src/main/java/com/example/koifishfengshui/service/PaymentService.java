@@ -27,8 +27,7 @@ public class PaymentService {
         String tmnCode = "8161QF3U";
         String secretKey = "5PQCLJTUF77QT32AC6KWMJ2IQ52OB5BC";
         String vnpUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-//        String returnUrl = "https://blearning.vn/guide/swp/docker-local?orderId=" + transaction.getTransactionId();
-        String returnUrl = "http://localhost:8080/api/ads/vn-pay-callback";
+        String returnUrl = "http://localhost:5173/success";
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
