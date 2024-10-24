@@ -1,6 +1,7 @@
 package com.example.koifishfengshui.service;
 
 import com.example.koifishfengshui.enums.FateType;
+import com.example.koifishfengshui.enums.KoiSize;
 import com.example.koifishfengshui.model.entity.Fate;
 import com.example.koifishfengshui.model.entity.FengShuiProduct;
 import com.example.koifishfengshui.model.entity.KoiFish;
@@ -47,19 +48,24 @@ public class ConsultationService {
 
         List<KoiFish> koiRecommendations = koiFishRepository.findByCompatibleFate(userFate);
 
+        KoiSize recommendedSize = getRecommendedSize(userFateType);
+
         return koiRecommendations.stream()
                 .map(koi -> {
                     double compatibilityRate = compatibilityService.calculateKoiCompatibility(userFateType, koi);
-                    if (compatibilityRate >= 0.7) {
+                    if (compatibilityRate >= 0.5) {
                         Map<String, Object> koiResult = new HashMap<>();
                         koiResult.put("koi", Map.of(
                                 "koiId", koi.getKoiId(),
                                 "species", koi.getSpecies(),
                                 "color", koi.getColor(),
-                                "description", koi.getDescription()
+                                "description", koi.getDescription(),
+                                "marketValue", koi.getPrice(),
+                                "imageUrl", koi.getImageUrl()
                         ));
-                        koiResult.put("compatibilityRate", Math.round(compatibilityRate * 100.0) / 100.0);
+                        koiResult.put("compatibilityRate", (compatibilityRate * 100.0));
                         koiResult.put("compatibleFate", koi.getCompatibleFate().getFateType());
+                        koiResult.put("recommendSize", recommendedSize);
                         return koiResult;
                     }
                     return null;
@@ -79,7 +85,7 @@ public class ConsultationService {
         return pondRecommendations.stream()
                 .map(pond -> {
                     double compatibilityRate = compatibilityService.calculatePondCompatibility(userFateType, pond);
-                    if (compatibilityRate >= 0.7) {
+                    if (compatibilityRate >= 0.5) {
                         Map<String, Object> pondResult = new HashMap<>();
                         pondResult.put("pond", Map.of(
                                 "pondFeatureId", pond.getPondFeatureId(),
@@ -88,7 +94,7 @@ public class ConsultationService {
                                 "direction", pond.getDirection(),
                                 "description", pond.getDescription()
                         ));
-                        pondResult.put("compatibilityRate", Math.round(compatibilityRate * 100.0) / 100.0);
+                        pondResult.put("compatibilityRate", (compatibilityRate * 100.0));
                         pondResult.put("compatibleFate", pond.getCompatibleFate().getFateType());
                         return pondResult;
                     }
@@ -109,7 +115,7 @@ public class ConsultationService {
         return productRecommendations.stream()
                 .map(product -> {
                     double compatibilityRate = compatibilityService.calculateProductCompatibility(userFateType, product);
-                    if (compatibilityRate >= 0.7) {
+                    if (compatibilityRate >= 0.5) {
                         Map<String, Object> productResult = new HashMap<>();
                         productResult.put("product", Map.of(
                                 "productId", product.getProductId(),
@@ -119,7 +125,7 @@ public class ConsultationService {
                                 "imageUrl", product.getImageUrl(),
                                 "description", product.getDescription()
                         ));
-                        productResult.put("compatibilityRate", Math.round(compatibilityRate * 100.0) / 100.0);
+                        productResult.put("compatibilityRate", (compatibilityRate * 100.0));
                         productResult.put("compatibleFate", product.getCompatibleFate().getFateType());
                         return productResult;
                     }
@@ -130,6 +136,21 @@ public class ConsultationService {
                     Collections.shuffle(collected);
                     return collected.stream().limit(4).collect(Collectors.toList());
                 }));
+    }
+
+    private KoiSize getRecommendedSize(FateType userFateType) {
+        switch (userFateType) {
+            case METAL:
+            case FIRE:
+                return KoiSize.LARGE;
+            case WOOD:
+            case EARTH:
+                return KoiSize.MEDIUM;
+            case WATER:
+                return KoiSize.SMALL;
+            default:
+                throw new IllegalArgumentException("Invalid Fate");
+        }
     }
 }
 

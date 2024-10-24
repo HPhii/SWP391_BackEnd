@@ -5,12 +5,11 @@ services:
     container_name: mysql_db_container
     environment:
       MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: koifengshui
     ports:
       - "3307:3306"
 
   app:
-    image: hieuphi/koifengshui:v12
+    image: hieuphi/koifengshui:v13
     container_name: springboot_container
     environment:
       MYSQL_URL: "jdbc:mysql://mysql_container:3306/koifengshui"
