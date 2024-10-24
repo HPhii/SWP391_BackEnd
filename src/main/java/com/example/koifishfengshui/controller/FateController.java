@@ -21,7 +21,7 @@ public class FateController {
     @Autowired
     private FateCalculationService fateCalculationService;
 
-    @PostMapping("/calculate")
+    @GetMapping("/calculate")
     public ResponseEntity<Map<String, Object>> calculateFate(@RequestParam("birthdate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthdate) {
         FateType userFate = fateCalculationService.calculateFate(birthdate);
 

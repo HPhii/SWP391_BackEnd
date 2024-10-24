@@ -127,7 +127,7 @@ public class AdsController {
     }
 
     @GetMapping("/vn-pay-callback")
-    public ResponseEntity<Map<String, String>> payCallbackHandler(HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> payCallbackHandler(HttpServletRequest request) {
         String status = request.getParameter("vnp_ResponseCode");
         String txnRef = request.getParameter("vnp_TxnRef");
 
@@ -140,9 +140,10 @@ public class AdsController {
 
         if ("00".equals(status)) {
             Advertisement ad = adService.handlePaymentResponse(transactionId, true);
-            Map<String, String> response = new HashMap<>();
+            Map<String, Object> response = new HashMap<>();
             response.put("message", "Payment successful");
-            response.put("redirectUrl", "http://localhost:5174/ads/" + ad.getAdId());
+            response.put("adId", ad.getAdId());
+            response.put("redirectUrl", "ads/adId=" + ad.getAdId());
             return ResponseEntity.ok(response);
         } else {
             adService.handlePaymentResponse(transactionId, false);

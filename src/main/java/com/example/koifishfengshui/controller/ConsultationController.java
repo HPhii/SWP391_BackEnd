@@ -21,7 +21,7 @@ public class ConsultationController {
     @Autowired
     private ConsultationService consultationService;
 
-    @PostMapping
+    @GetMapping
     public ResponseEntity<Map<String, Object>> getConsultation(@RequestParam("fate") FateType userFate) {
         Fate userFateDetails = consultationService.getUserFate(userFate);
 
