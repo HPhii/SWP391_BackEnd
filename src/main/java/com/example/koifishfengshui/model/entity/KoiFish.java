@@ -35,9 +35,6 @@ public class KoiFish {
 
     @Column(nullable = false, length = 500)
     private String description;
-
-    @Column(name = "color_fate")
-    private String colorFate;
 }
 
 

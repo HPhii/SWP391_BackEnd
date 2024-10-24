@@ -13,6 +13,8 @@ import com.example.koifishfengshui.repository.FateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,14 +43,20 @@ public class CompatibilityService {
 
         double compatibilityRate = 0;
 
+        List<String> koiColors = Arrays.asList(koi.getColor().split(",\\s*"));
+
         if (userFate.getFateType() == koiFate.getFateType()) {
-            compatibilityRate += 0.6;
+            compatibilityRate += 0.8;
         }
 
-        if (userFate.getCompatibleColors().contains(koi.getColor())) {
-            compatibilityRate += 0.2;
-        } else if (userFate.getIncompatibleColors().contains(koi.getColor())) {
-            compatibilityRate -= 0.1;
+        for (String koiColor : koiColors) {
+            if (userFate.getCompatibleColors().contains(koiColor)) {
+                compatibilityRate += 0.2;
+                break;
+            } else if (userFate.getIncompatibleColors().contains(koiColor)) {
+                compatibilityRate -= 0.1;
+                break;
+            }
         }
 
         if (isSizeCompatible(userFate.getFateType(), koi.getSize())) {
@@ -62,6 +70,7 @@ public class CompatibilityService {
         return Math.max(0, Math.min(compatibilityRate, 1));
     }
 
+
     public double calculatePondCompatibility(FateType userFateType, PondFeature pond) {
         Fate userFate = fateRepository.findByFateType(userFateType)
                 .orElseThrow(() -> new EntityNotFoundException("Fate not found!"));
@@ -70,7 +79,7 @@ public class CompatibilityService {
         double compatibilityRate = 0;
 
         if (userFate.getFateType() == pondFate.getFateType()) {
-            compatibilityRate += 0.6;
+            compatibilityRate += 0.8;
         }
 
         if (isDirectionCompatible(userFate.getFateType(), pond.getDirection())) {

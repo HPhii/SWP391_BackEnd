@@ -60,13 +60,13 @@ public class KoiFishService {
         if (requestDTO.getSpecies() != null) koiFish.setSpecies(requestDTO.getSpecies());
         if (requestDTO.getColor() != null) koiFish.setColor(requestDTO.getColor());
         if (requestDTO.getSize() != null) koiFish.setSize(requestDTO.getSize());
-        if (requestDTO.getPrice() == 0) koiFish.setPrice(requestDTO.getPrice());
+        if (requestDTO.getPrice() > 0) koiFish.setPrice(requestDTO.getPrice());
         if (imageUrl != null) koiFish.setImageUrl(imageUrl);
         if (requestDTO.getDescription() != null) koiFish.setDescription(requestDTO.getDescription());
 
-        Fate fate = fateRepository.findByFateType(requestDTO.getCompatibleFateType())
-                .orElseThrow(() -> new RuntimeException("Fate not found"));
-        koiFish.setCompatibleFate(fate);
+//        Fate fate = fateRepository.findByFateType(requestDTO.getCompatibleFateType())
+//                .orElseThrow(() -> new RuntimeException("Fate not found"));
+//        koiFish.setCompatibleFate(fate);
 
         koiFish = koiFishRepository.save(koiFish);
 
