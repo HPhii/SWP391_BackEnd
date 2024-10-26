@@ -1,6 +1,6 @@
 package com.example.koifishfengshui.controller;
 
-import com.example.koifishfengshui.enums.FateType;
+import com.example.koifishfengshui.model.entity.Fate;
 import com.example.koifishfengshui.service.FateCalculationService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/fate")
@@ -22,13 +20,9 @@ public class FateController {
     private FateCalculationService fateCalculationService;
 
     @GetMapping("/calculate")
-    public ResponseEntity<Map<String, Object>> calculateFate(@RequestParam("birthdate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthdate) {
-        FateType userFate = fateCalculationService.calculateFate(birthdate);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("userFate", userFate);
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Fate> calculateFate(@RequestParam("birthdate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthdate) {
+        Fate fate = fateCalculationService.calculateFate(birthdate);
+        return ResponseEntity.ok(fate);
     }
 }
 

@@ -14,4 +14,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByResetPasswordToken(String token);
     public Account findAccountByEmail(String email);
     public Account findAccountById(long id);
+
+    boolean existsByUsername(String uniqueUsername);
 }

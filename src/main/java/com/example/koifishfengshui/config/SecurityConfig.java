@@ -2,6 +2,9 @@ package com.example.koifishfengshui.config;
 
 import com.cloudinary.Cloudinary;
 import com.example.koifishfengshui.service.AuthenticationService;
+import com.example.koifishfengshui.service.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -12,12 +15,18 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +45,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() {
+        return new CustomOAuth2UserService();
+    }
+
+    @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
@@ -46,7 +60,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public Cloudinary getCloudinary(){
+    public Cloudinary getCloudinary() {
         Map config = new HashMap();
         config.put("cloud_name", "dg0dwfewe");
         config.put("api_key", "455981336253128");
@@ -65,10 +79,30 @@ public class SecurityConfig {
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login") // Specify your login page
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oAuth2UserService()) // Custom user service
+                        )
+                        .successHandler(this::oauth2SuccessHandler) // Custom success handler
+                )
                 .userDetailsService(authenticationService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
+    private void oauth2SuccessHandler(HttpServletRequest request, HttpServletResponse response,
+                                      Authentication authentication) throws IOException {
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        String token = (String) oAuth2User.getAttributes().get("token");
+
+        String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/")
+                .queryParam("token", token)
+                .build().toUriString();
+
+        response.sendRedirect(redirectUrl);
+    }
+
 }
 

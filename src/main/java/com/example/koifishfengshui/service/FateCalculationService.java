@@ -1,12 +1,18 @@
 package com.example.koifishfengshui.service;
 
 import com.example.koifishfengshui.enums.FateType;
+import com.example.koifishfengshui.exception.EntityNotFoundException;
+import com.example.koifishfengshui.model.entity.Fate;
+import com.example.koifishfengshui.repository.FateRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
 @Service
 public class FateCalculationService {
+    @Autowired
+    FateRepository fateRepository;
 
     // Can: Giáp - Ất = 1, Bính - Đinh = 2, Mậu - Kỷ = 3, Canh - Tân = 4, Nhâm - Quý = 5
     private static final int[] CAN_VALUES = {4, 4, 5, 5, 1, 1, 2, 2, 3, 3};
@@ -14,7 +20,7 @@ public class FateCalculationService {
     // Chi: Tý - Sửu - Ngọ - Mùi = 0, Dần - Mão - Thân - Dậu = 1, Thìn - Tỵ - Tuất - Hợi = 2
     private static final int[] CHI_VALUES = {1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0};
 
-    public FateType calculateFate(LocalDate birthdate) {
+    public Fate calculateFate(LocalDate birthdate) {
         int year = birthdate.getYear();
 
         int can = calculateCan(year);
@@ -27,7 +33,11 @@ public class FateCalculationService {
             fateValue -= 5;
         }
 
-        return determineFate(fateValue);
+        FateType fateType = determineFate(fateValue);
+        Fate fate = fateRepository.findByFateType(fateType)
+                .orElseThrow(() -> new EntityNotFoundException("Fate not found."));
+
+        return fate;
     }
 
     private int calculateCan(int year) {
