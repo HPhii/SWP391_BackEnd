@@ -2,6 +2,7 @@ package com.example.koifishfengshui.service;
 
 import com.example.koifishfengshui.enums.FateType;
 import com.example.koifishfengshui.enums.KoiSize;
+import com.example.koifishfengshui.enums.ProductType;
 import com.example.koifishfengshui.model.entity.Fate;
 import com.example.koifishfengshui.model.entity.FengShuiProduct;
 import com.example.koifishfengshui.model.entity.KoiFish;
@@ -115,7 +116,7 @@ public class ConsultationService {
         return productRecommendations.stream()
                 .map(product -> {
                     double compatibilityRate = compatibilityService.calculateProductCompatibility(userFateType, product);
-                    if (compatibilityRate >= 0.5) {
+                    if (compatibilityRate >= 0.5 && product.getType() != ProductType.KOI_ACCESSORY) {
                         Map<String, Object> productResult = new HashMap<>();
                         productResult.put("product", Map.of(
                                 "productId", product.getProductId(),

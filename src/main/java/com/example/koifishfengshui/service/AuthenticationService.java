@@ -16,6 +16,9 @@ import com.example.koifishfengshui.model.response.dto.EmailDetails;
 import com.example.koifishfengshui.repository.AccountRepository;
 import com.example.koifishfengshui.repository.UserRepository;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,9 +32,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -153,35 +159,63 @@ public class AuthenticationService implements UserDetailsService {
         return accountResponse;
     }
 
-    public AccountResponse loginGoogleResponse(GoogleIdToken googleIdToken) {
-        GoogleIdToken.Payload payload = googleIdToken.getPayload();
+    public String generateUniqueUsername(String googleName) {
+        // 1. Normalize the name (remove accents and lowercase)
+        String normalized = Normalizer.normalize(googleName, Normalizer.Form.NFD);
+        String username = Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("");
+        username = username.replaceAll("\\s+", "").toLowerCase();
 
-        String email = payload.getEmail();
+        // 2. Check if the username exists in the system
+        String uniqueUsername = username;
+        int counter = 1;
+        while (accountRepository.existsByUsername(uniqueUsername)) {
+            uniqueUsername = username + counter;
+            counter++;
+        }
+
+        return uniqueUsername;
+    }
+
+    public AccountResponse loginGoogle(String googleToken) {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList("472892753586-grlnbpao8omb8dr1hfk57o87iujm54dg.apps.googleusercontent.com"))
+                .build();
+
+        GoogleIdToken idToken;
+        try {
+            idToken = verifier.verify(googleToken);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid Google token");
+        }
+
+        if (idToken == null) throw new RuntimeException("Invalid ID token.");
+
+        String email = idToken.getPayload().getEmail();
         Account account = accountRepository.findAccountByEmail(email);
+
         if (account == null) {
+            String name = (String) idToken.getPayload().get("name");
+            String username = generateUniqueUsername(name);
+
             User newUser = new User();
             newUser.setStatus(Status.ACTIVE);
-            newUser.setFullName((String) payload.get("name"));
+            newUser.setFullName(name);
             userRepository.save(newUser);
 
             account = new Account();
             account.setEmail(email);
-            account.setUsername(((String) payload.get("name")).toLowerCase());
             account.setRole(Role.CUSTOMER);
             account.setLoginProvider(LoginProvider.GOOGLE);
             account.setStatus(Status.ACTIVE);
             account.setCreatedAt(LocalDateTime.now());
             account.setUpdatedAt(LocalDateTime.now());
             account.setUser(newUser);
+            account.setUsername(username);
             accountRepository.save(account);
-
-            sendMail(account);
         }
 
-        String token = tokenService.generateToken(account);
-        AccountResponse accountResponse = new AccountResponse();
-        accountResponse.setEmail(account.getEmail());
-        accountResponse.setToken(token);
+        AccountResponse accountResponse = modelMapper.map(account, AccountResponse.class);
+        accountResponse.setToken(tokenService.generateToken(account));
         return accountResponse;
     }
 

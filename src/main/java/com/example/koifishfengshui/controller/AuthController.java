@@ -1,34 +1,22 @@
 package com.example.koifishfengshui.controller;
 
 import com.example.koifishfengshui.config.Filter;
-import com.example.koifishfengshui.enums.LoginProvider;
-import com.example.koifishfengshui.enums.Role;
-import com.example.koifishfengshui.enums.Status;
-import com.example.koifishfengshui.model.entity.Account;
-import com.example.koifishfengshui.model.response.dto.AccountResponse;
 import com.example.koifishfengshui.model.request.LoginRequest;
 import com.example.koifishfengshui.model.request.RegistrationRequest;
+import com.example.koifishfengshui.model.response.dto.AccountResponse;
 import com.example.koifishfengshui.repository.AccountRepository;
 import com.example.koifishfengshui.service.AccountService;
 import com.example.koifishfengshui.service.AuthenticationService;
 import com.example.koifishfengshui.service.TokenService;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
+import java.util.Map;
 
 
 @RestController
@@ -82,23 +70,10 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request or token missing.");
     }
 
-    @PostMapping("/google")
-    public ResponseEntity<?> googleLogin(@RequestParam String idToken) {
-        try {
-            String googleClientId = System.getenv("GOOGLE_CLIENT_ID");
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
-                    .setAudience(Collections.singletonList("967281572671-up2oqffr8s9pf74m1gh83e3qjsqp15qd.apps.googleusercontent.com"))
-                    .build();
-
-            GoogleIdToken googleIdToken = verifier.verify(idToken);
-            if (googleIdToken != null) {
-                AccountResponse accountResponse = authenticationService.loginGoogleResponse(googleIdToken);
-
-                return ResponseEntity.ok(accountResponse);
-            }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Google token.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Google login failed.");
-        }
+    @PostMapping("/login/google")
+    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> tokenData) {
+        String googleToken = tokenData.get("token");
+        AccountResponse account = authenticationService.loginGoogle(googleToken);
+        return ResponseEntity.ok(account);
     }
 }
