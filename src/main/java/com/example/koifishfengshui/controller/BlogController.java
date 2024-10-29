@@ -29,13 +29,13 @@ public class BlogController {
 
     // Create a new blog post
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BlogResponse> createBlog(@Valid BlogRequest blogRequest, Authentication authentication) {
+    public ResponseEntity<BlogResponse> createBlog(@ModelAttribute BlogRequest blogRequest, Authentication authentication) {
         BlogResponse newBlog = blogService.createBlog(blogRequest, authentication);
         return new ResponseEntity<>(newBlog, HttpStatus.CREATED);
     }
 
     @PutMapping(value = "/{blogId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BlogResponse> updateBlog(@PathVariable Long blogId, @Valid BlogRequest blogRequest) {
+    public ResponseEntity<BlogResponse> updateBlog(@PathVariable Long blogId, @ModelAttribute BlogRequest blogRequest) {
         BlogResponse updatedBlog = blogService.updateBlog(blogId, blogRequest);
         return ResponseEntity.ok(updatedBlog);
     }

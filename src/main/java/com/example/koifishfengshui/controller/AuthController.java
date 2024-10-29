@@ -40,9 +40,6 @@ public class AuthController {
     @Autowired
     private AccountRepository accountRepository;
 
-//    @Value("${GOOGLE_CLIENT_ID}")
-//    private String googleClientId;
-
     @PostMapping("/register")
     public ResponseEntity registerUser(@Valid @RequestBody RegistrationRequest registrationDTO) {
         try {

@@ -31,6 +31,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
 import java.time.LocalDateTime;
@@ -68,27 +69,30 @@ public class AuthenticationService implements UserDetailsService {
     private static final String WELCOME_SUBJECT = "Welcome to Koi Feng Shui! We're Excited to Have You";
     private static final String WELCOME_TEMPLATE = "welcome-template";
 
+
+    @Transactional
     public AccountResponse register(RegistrationRequest registerRequestDTO) {
         if (!registerRequestDTO.getPassword().equals(registerRequestDTO.getConfirmPassword())) {
             throw new PasswordMismatchEntity("Passwords do not match!");
         }
 
         Account account = modelMapper.map(registerRequestDTO, Account.class);
+
+        User newUser = new User();
+        newUser.setStatus(Status.ACTIVE);
+
+        account.setUsername(registerRequestDTO.getUsername());
+        account.setEmail(registerRequestDTO.getEmail());
+        account.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
+        account.setStatus(Status.ACTIVE);
+        account.setRole(Role.CUSTOMER);
+        account.setLoginProvider(LoginProvider.EMAIL);
+        account.setCreatedAt(LocalDateTime.now());
+        account.setUpdatedAt(LocalDateTime.now());
+        account.setUser(newUser);
+
         try {
-
-            User newUser = new User();
-            newUser.setStatus(Status.ACTIVE);
             userRepository.save(newUser);
-
-            account.setUsername(registerRequestDTO.getUsername());
-            account.setEmail(registerRequestDTO.getEmail());
-            account.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
-            account.setStatus(Status.ACTIVE);
-            account.setRole(Role.CUSTOMER);
-            account.setLoginProvider(LoginProvider.EMAIL);
-            account.setCreatedAt(LocalDateTime.now());
-            account.setUpdatedAt(LocalDateTime.now());
-            account.setUser(newUser);
             Account newAccount = accountRepository.save(account);
 
             AccountResponse accountResponse = modelMapper.map(newAccount, AccountResponse.class);
@@ -98,21 +102,21 @@ public class AuthenticationService implements UserDetailsService {
 
             return accountResponse;
         } catch (Exception e) {
-            if (e.getMessage().contains((account.getEmail()))) {
+            if (e.getMessage().contains(account.getEmail())) {
                 throw new DuplicateEntity("Duplicate email");
             } else {
                 throw new DuplicateEntity("Duplicate entity");
             }
         }
-
     }
+
 
     private void sendMail(Account newAccount) {
         EmailDetails emailDetails = new EmailDetails();
         emailDetails.setReceiver(newAccount);
         emailDetails.setSubject(WELCOME_SUBJECT);
         Map<String, Object> welcomeContext = Map.of("name", emailDetails.getReceiver().getEmail());
-        emailService.sendMail(emailDetails,WELCOME_TEMPLATE , welcomeContext);
+        emailService.sendMail(emailDetails, WELCOME_TEMPLATE, welcomeContext);
     }
 
     public AccountResponse login(LoginRequest loginRequestDTO) {
@@ -159,13 +163,11 @@ public class AuthenticationService implements UserDetailsService {
         return accountResponse;
     }
 
-    public String generateUniqueUsername(String googleName) {
-        // 1. Normalize the name (remove accents and lowercase)
+    private String generateUniqueUsername(String googleName) {
         String normalized = Normalizer.normalize(googleName, Normalizer.Form.NFD);
         String username = Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("");
         username = username.replaceAll("\\s+", "").toLowerCase();
 
-        // 2. Check if the username exists in the system
         String uniqueUsername = username;
         int counter = 1;
         while (accountRepository.existsByUsername(uniqueUsername)) {

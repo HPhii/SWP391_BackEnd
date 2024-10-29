@@ -30,7 +30,7 @@ public class KoiFishController {
 
     @PutMapping(value = "/{koiId}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<KoiFishResponse> updateKoiFish(
-            @PathVariable Long koiId, @ModelAttribute KoiFishRequest koiFishRequest) {
+            @PathVariable Long koiId,@ModelAttribute KoiFishRequest koiFishRequest) {
         KoiFishResponse koiFishResponse = koiFishService.updateKoiFish(koiId, koiFishRequest);
         return new ResponseEntity<>(koiFishResponse, HttpStatus.OK);
     }

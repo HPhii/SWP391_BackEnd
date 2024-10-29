@@ -9,6 +9,7 @@ import com.example.koifishfengshui.model.response.paged.PagedAdResponse;
 import com.example.koifishfengshui.service.AdService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -108,7 +109,7 @@ public class AdsController {
 
     // User selects a subscription plan for their ad
     @PostMapping("/{adId}/subscription")
-    public ResponseEntity<String> selectSubscriptionPlan(@PathVariable Long adId, @RequestBody SubscriptionPlanRequest planRequest, Authentication authentication) throws Exception {
+    public ResponseEntity<String> selectSubscriptionPlan(@PathVariable Long adId, @Valid @RequestBody SubscriptionPlanRequest planRequest, Authentication authentication) throws Exception {
         String paymentUrl = adService.selectSubscriptionPlan(adId, planRequest, authentication);
         return ResponseEntity.ok(paymentUrl);
     }
