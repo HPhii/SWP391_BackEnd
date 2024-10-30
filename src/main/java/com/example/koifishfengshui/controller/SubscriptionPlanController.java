@@ -3,6 +3,7 @@ package com.example.koifishfengshui.controller;
 import com.example.koifishfengshui.model.entity.SubscriptionPlan;
 import com.example.koifishfengshui.service.SubscriptionPlanService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +15,8 @@ import java.util.List;
 @SecurityRequirement(name = "api")
 public class SubscriptionPlanController {
 
-    private final SubscriptionPlanService subscriptionPlanService;
-
-    public SubscriptionPlanController(SubscriptionPlanService subscriptionPlanService) {
-        this.subscriptionPlanService = subscriptionPlanService;
-    }
+    @Autowired
+    private SubscriptionPlanService subscriptionPlanService;
 
     // Get all subscription plans
     @GetMapping

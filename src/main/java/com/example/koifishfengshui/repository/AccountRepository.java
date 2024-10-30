@@ -1,11 +1,13 @@
 package com.example.koifishfengshui.repository;
 
 
+import com.example.koifishfengshui.enums.Role;
 import com.example.koifishfengshui.model.entity.Account;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
@@ -16,4 +18,11 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     public Account findAccountById(long id);
 
     boolean existsByUsername(String uniqueUsername);
+
+    @Query("SELECT count(a) FROM Account a WHERE a.role = :role")
+    long countByRole(@Param("role") Role role);
+
+    // Đếm số lượng người dùng mới từ một ngày nhất định
+    @Query("SELECT COUNT(a) FROM Account a WHERE a.createdAt >= :createdAt")
+    long countByCreatedAtAfter(@Param("createdAt") LocalDateTime createdAt);
 }

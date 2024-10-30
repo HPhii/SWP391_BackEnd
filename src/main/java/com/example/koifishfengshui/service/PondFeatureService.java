@@ -43,10 +43,6 @@ public class PondFeatureService {
         if (requestDTO.getDirection() != null) pondFeature.setDirection(requestDTO.getDirection());
         if (requestDTO.getDescription() != null) pondFeature.setDescription(requestDTO.getDescription());
 
-        Fate fate = fateRepository.findByFateType(requestDTO.getCompatibleFateType())
-                .orElseThrow(() -> new RuntimeException("Fate not found"));
-        pondFeature.setCompatibleFate(fate);
-
         pondFeature = pondFeatureRepository.save(pondFeature);
 
         return mapToResponseDTO(pondFeature);

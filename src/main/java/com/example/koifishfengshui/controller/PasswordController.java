@@ -1,5 +1,6 @@
 package com.example.koifishfengshui.controller;
 
+import com.example.koifishfengshui.exception.EntityNotFoundException;
 import com.example.koifishfengshui.model.request.ForgotPasswordRequest;
 import com.example.koifishfengshui.service.AccountService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,14 +23,16 @@ public class PasswordController {
         try {
             accountService.forgotPassword(forgotPasswordDTO);
             return ResponseEntity.ok("Password reset email sent!");
-        } catch (Exception e) {
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(404).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Internal server error");
         }
     }
 
     // Reset Password
     @PostMapping("/reset")
-    public ResponseEntity<String> resetPassword(@RequestParam("token") String token, @RequestParam("newPassword") String newPassword) {
+    public ResponseEntity<String> resetPassword(@RequestParam("token") String token, @RequestBody String newPassword) {
         try {
             accountService.resetPassword(token, newPassword);
             return ResponseEntity.ok("Password has been reset successfully!");

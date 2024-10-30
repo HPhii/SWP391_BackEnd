@@ -4,6 +4,7 @@ import com.example.koifishfengshui.model.request.PondFeatureRequest;
 import com.example.koifishfengshui.model.response.dto.PondFeatureResponse;
 import com.example.koifishfengshui.service.PondFeatureService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class PondFeatureController {
 
     @PutMapping("/{pondFeatureId}")
     public ResponseEntity<PondFeatureResponse> updatePondFeature(
-            @PathVariable Long pondFeatureId, @RequestBody PondFeatureRequest pondFeatureRequest) {
+            @PathVariable Long pondFeatureId,@RequestBody PondFeatureRequest pondFeatureRequest) {
         PondFeatureResponse pondFeatureResponse = pondFeatureService.updatePondFeature(pondFeatureId, pondFeatureRequest);
         return new ResponseEntity<>(pondFeatureResponse, HttpStatus.OK);
     }
@@ -36,16 +37,6 @@ public class PondFeatureController {
         PondFeatureResponse pondFeatureResponse = pondFeatureService.getPondFeatureById(pondFeatureId);
         return new ResponseEntity<>(pondFeatureResponse, HttpStatus.OK);
     }
-
-//    @GetMapping
-//    public ResponseEntity<PagedPondFeatureResponse> getAllPondFeatures(
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "8") int size) {
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//        PagedPondFeatureResponse response = pondFeatureService.getAllPondFeatures(pageable);
-//        return ResponseEntity.ok(response);
-//    }
 
     @DeleteMapping("/{pondFeatureId}")
     public ResponseEntity<Void> deletePondFeature(@PathVariable Long pondFeatureId) {
