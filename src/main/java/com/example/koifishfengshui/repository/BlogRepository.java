@@ -15,6 +15,8 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 
     Page<Blog> findByCategory_CategoryId(Long categoryId, Pageable pageable);
 
+    Page<Blog> findByCategory_CategoryName(String categoryName, Pageable pageable);
+
     //    @Query("SELECT b FROM Blog b " +
 //            "WHERE (:search IS NULL OR b.title LIKE %:search% " +
 //            "OR b.shortDescription LIKE %:search% " +

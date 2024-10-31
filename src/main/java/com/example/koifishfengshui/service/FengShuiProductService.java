@@ -1,5 +1,6 @@
 package com.example.koifishfengshui.service;
 
+import com.example.koifishfengshui.enums.FateType;
 import com.example.koifishfengshui.exception.EntityNotFoundException;
 import com.example.koifishfengshui.model.entity.Fate;
 import com.example.koifishfengshui.model.entity.FengShuiProduct;
@@ -13,9 +14,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FengShuiProductService {
@@ -68,6 +71,13 @@ public class FengShuiProductService {
         );
     }
 
+    public List<FengShuiProduct> getRandomProductsByFateType(FateType fateType) {
+        List<FengShuiProduct> products = productRepository.findByCompatibleFate_FateType(fateType);
+
+        // Shuffle and get up to 3 random products
+        Collections.shuffle(products);
+        return products.stream().limit(3).collect(Collectors.toList());
+    }
 
     // Read product by ID
     public Optional<FengShuiProduct> getProductById(Long id) {

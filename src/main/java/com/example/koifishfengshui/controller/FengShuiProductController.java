@@ -1,5 +1,6 @@
 package com.example.koifishfengshui.controller;
 
+import com.example.koifishfengshui.enums.FateType;
 import com.example.koifishfengshui.model.entity.FengShuiProduct;
 import com.example.koifishfengshui.model.response.paged.PagedProductResponse;
 import com.example.koifishfengshui.service.FengShuiProductService;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -51,5 +54,11 @@ public class FengShuiProductController {
     public ResponseEntity<Void> deleteProductById(@PathVariable Long id) {
         productService.deleteProductById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/random")
+    public ResponseEntity<List<FengShuiProduct>> getRandomProductsByFateType(@RequestParam FateType fateType) {
+        List<FengShuiProduct> randomProducts = productService.getRandomProductsByFateType(fateType);
+        return ResponseEntity.ok(randomProducts);
     }
 }

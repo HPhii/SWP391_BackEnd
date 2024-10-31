@@ -87,14 +87,26 @@ public class BlogController {
     }
     
     // Get blogs by category
-    @GetMapping("/category/{categoryId}")
+//    @GetMapping("/category/{categoryId}")
+//    public ResponseEntity<PagedBlogResponse> getBlogsByCategory(
+//            @PathVariable Long categoryId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "8") int size) {
+//
+//        Pageable pageable = PageRequest.of(page, size);
+//        PagedBlogResponse response = blogService.getBlogsByCategory(categoryId, pageable);
+//        return ResponseEntity.ok(response);
+//    }
+
+    @GetMapping("/category/{categoryName}")
     public ResponseEntity<PagedBlogResponse> getBlogsByCategory(
-            @PathVariable Long categoryId,
+            @PathVariable String categoryName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        PagedBlogResponse response = blogService.getBlogsByCategory(categoryId, pageable);
+        PagedBlogResponse response = blogService.getBlogsByCategory(categoryName, pageable);
         return ResponseEntity.ok(response);
     }
+
 }

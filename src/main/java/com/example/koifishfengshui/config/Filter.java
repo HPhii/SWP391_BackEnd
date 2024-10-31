@@ -31,12 +31,13 @@ public class Filter extends OncePerRequestFilter {
             "/api/auth/register",
             "/api/auth/login",
             "/api/auth/google",
-            "/api/password/forgot",
-            "/api/password/reset",
+            "/api/password/**",
             "/api/ads/vn-pay-callback",
             "/api/cloudinary/upload",
             "/api/fate/calculate",
-            "/api/auth/login/google"
+            "/api/auth/login/google",
+            "/api/products/random",
+            "api/blogs/**"
     );
 
     @Autowired
