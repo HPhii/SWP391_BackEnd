@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/password")
 @CrossOrigin("*")
@@ -32,7 +34,9 @@ public class PasswordController {
 
     // Reset Password
     @PostMapping("/reset")
-    public ResponseEntity<String> resetPassword(@RequestParam("token") String token, @RequestBody String newPassword) {
+    public ResponseEntity<String> resetPassword(@RequestParam("token") String token,
+                                                @RequestBody Map<String, String> body) {
+        String newPassword = body.get("newPassword");
         try {
             accountService.resetPassword(token, newPassword);
             return ResponseEntity.ok("Password has been reset successfully!");
@@ -40,4 +44,5 @@ public class PasswordController {
             return ResponseEntity.status(404).body(e.getMessage());
         }
     }
+
 }

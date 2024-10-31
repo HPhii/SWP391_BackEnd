@@ -28,7 +28,6 @@ public interface FengShuiProductRepository extends JpaRepository<FengShuiProduct
     // Find products compatible with a specific fate
     List<FengShuiProduct> findByCompatibleFate(FateType fate);
 
-    // Find products by fate and type
-    List<FengShuiProduct> findByCompatibleFateAndType(FateType fate, ProductType type);
+    List<FengShuiProduct> findByCompatibleFate_FateType(FateType fateType);
 }
 

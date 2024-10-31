@@ -66,13 +66,13 @@ public class DashboardService {
         List<User> topSpendingUsers = transactionHistoryRepository.findTopSpendingUsers(PageRequest.of(0, 10));
         stats.put("topSpendingUsers", topSpendingUsers);
 
-        // Transaction History
+        // Transaction History (biểu đồ tròn)
         long successfulTransactions = transactionHistoryRepository.countByPaymentStatus(PaymentStatus.SUCCESS);
         long failedTransactions = transactionHistoryRepository.countByPaymentStatus(PaymentStatus.PENDING);
         stats.put("successfulTransactions", successfulTransactions);
         stats.put("failedTransactions", failedTransactions);
 
-        // Revenue by Month
+        // Revenue by Month (biểu đồ cột)
         int currentYear = LocalDate.now().getYear();
         List<Object[]> monthlyRevenueData = transactionHistoryRepository.getMonthlyRevenue(currentYear);
         Map<Integer, Double> monthlyRevenue = new HashMap<>();
