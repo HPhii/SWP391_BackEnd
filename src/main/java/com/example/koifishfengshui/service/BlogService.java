@@ -157,12 +157,17 @@ public class BlogService {
         return mapToPagedBlogResponse(blogPage, pageable);
     }
 
+//    @Transactional
+//    public PagedBlogResponse getBlogsByCategory(String categoryName, Pageable pageable) {
+//        Page<Blog> blogPage = blogRepository.findByCategory_CategoryName(categoryName, pageable);
+//        return mapToPagedBlogResponse(blogPage, pageable);
+//    }
+
     @Transactional
     public PagedBlogResponse getBlogsByCategory(String categoryName, Pageable pageable) {
-        Page<Blog> blogPage = blogRepository.findByCategory_CategoryName(categoryName, pageable);
+        Page<Blog> blogPage = blogRepository.findByCategory_CategoryNameAndStatus(categoryName, BlogStatus.APPROVED, pageable);
         return mapToPagedBlogResponse(blogPage, pageable);
     }
-
 
     private BlogResponse mapToBlogResponse(Blog blog) {
         BlogResponse response = modelMapper.map(blog, BlogResponse.class);

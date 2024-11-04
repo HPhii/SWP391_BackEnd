@@ -21,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -63,7 +64,7 @@ public class AdsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/active")
     public ResponseEntity<PagedAdResponse> getActiveAds(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -72,6 +73,12 @@ public class AdsController {
 
         PagedAdResponse response = adService.getActiveAds(pageable);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/random")
+    public ResponseEntity<List<AdResponse>> getRandomProductsByFateType() {
+        List<AdResponse> randomProducts = adService.getRandomAds();
+        return ResponseEntity.ok(randomProducts);
     }
 
     @GetMapping("/status")
@@ -86,7 +93,7 @@ public class AdsController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/{adId}")
+    @GetMapping("/id/{adId}")
     public ResponseEntity<AdResponse> getAdById(@PathVariable Long adId) {
         AdResponse adResponse = adService.getAdById(adId);
         return ResponseEntity.ok(adResponse);

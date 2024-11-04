@@ -3,6 +3,8 @@ package com.example.koifishfengshui.service;
 import com.example.koifishfengshui.exception.EntityNotFoundException;
 import com.example.koifishfengshui.model.entity.Account;
 import com.example.koifishfengshui.model.request.ForgotPasswordRequest;
+import com.example.koifishfengshui.model.request.UpdateFCMRequest;
+import com.example.koifishfengshui.model.response.dto.AccountResponse;
 import com.example.koifishfengshui.model.response.dto.EmailDetails;
 import com.example.koifishfengshui.repository.AccountRepository;
 import jakarta.mail.MessagingException;
@@ -98,5 +100,11 @@ public class AccountService {
         account.setResetPasswordTokenExpiry(null);
         accountRepository.save(account);
         logger.info("Password reset successfully for user: {}", account.getUsername());
+    }
+
+    public Account updateFCM(UpdateFCMRequest updateFCMRequest) {
+        Account account = getCurrentAccount();
+        account.setFcmToken(updateFCMRequest.getFcmToken());
+        return accountRepository.save(account);
     }
 }

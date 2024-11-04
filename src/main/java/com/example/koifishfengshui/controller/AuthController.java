@@ -1,8 +1,10 @@
 package com.example.koifishfengshui.controller;
 
 import com.example.koifishfengshui.config.Filter;
+import com.example.koifishfengshui.model.entity.Account;
 import com.example.koifishfengshui.model.request.LoginRequest;
 import com.example.koifishfengshui.model.request.RegistrationRequest;
+import com.example.koifishfengshui.model.request.UpdateFCMRequest;
 import com.example.koifishfengshui.model.response.dto.AccountResponse;
 import com.example.koifishfengshui.repository.AccountRepository;
 import com.example.koifishfengshui.service.AccountService;
@@ -73,4 +75,11 @@ public class AuthController {
         AccountResponse account = authenticationService.loginGoogle(googleToken);
         return ResponseEntity.ok(account);
     }
+
+    @PatchMapping("/fcm")
+    public ResponseEntity<?> updateFCM(@RequestBody UpdateFCMRequest updateFCMRequest) {
+        Account updatedAccount = accountService.updateFCM(updateFCMRequest);
+        return ResponseEntity.ok("FCM token updated successfully");
+    }
+
 }

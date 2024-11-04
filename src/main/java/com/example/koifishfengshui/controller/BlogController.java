@@ -28,7 +28,7 @@ public class BlogController {
     private BlogService blogService;
 
     // Create a new blog post
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/post", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BlogResponse> createBlog(@ModelAttribute BlogRequest blogRequest, Authentication authentication) {
         BlogResponse newBlog = blogService.createBlog(blogRequest, authentication);
         return new ResponseEntity<>(newBlog, HttpStatus.CREATED);
@@ -56,14 +56,14 @@ public class BlogController {
     }
 
     // Get a blog post by its ID
-    @GetMapping("/{blogId}")
+    @GetMapping("/get/{blogId}")
     public ResponseEntity<BlogResponse> getBlogById(@PathVariable Long blogId) {
         BlogResponse blog = blogService.getBlogById(blogId);
         return ResponseEntity.ok(blog);
     }
 
     // Get all approved blog posts
-    @GetMapping
+    @GetMapping("/get")
     public ResponseEntity<PagedBlogResponse> getAllBlogsByStatus(
             @RequestParam(required = false) BlogStatus blogStatus,
             @RequestParam(defaultValue = "0") int page,
@@ -85,18 +85,6 @@ public class BlogController {
         PagedBlogResponse response = blogService.searchBlogs(search, pageable);
         return ResponseEntity.ok(response);
     }
-    
-    // Get blogs by category
-//    @GetMapping("/category/{categoryId}")
-//    public ResponseEntity<PagedBlogResponse> getBlogsByCategory(
-//            @PathVariable Long categoryId,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "8") int size) {
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//        PagedBlogResponse response = blogService.getBlogsByCategory(categoryId, pageable);
-//        return ResponseEntity.ok(response);
-//    }
 
     @GetMapping("/category/{categoryName}")
     public ResponseEntity<PagedBlogResponse> getBlogsByCategory(
@@ -108,5 +96,4 @@ public class BlogController {
         PagedBlogResponse response = blogService.getBlogsByCategory(categoryName, pageable);
         return ResponseEntity.ok(response);
     }
-
 }

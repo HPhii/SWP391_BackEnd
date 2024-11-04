@@ -17,12 +17,15 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 
     Page<Blog> findByCategory_CategoryName(String categoryName, Pageable pageable);
 
-    //    @Query("SELECT b FROM Blog b " +
-//            "WHERE (:search IS NULL OR b.title LIKE %:search% " +
-//            "OR b.shortDescription LIKE %:search% " +
+    Page<Blog> findByCategory_CategoryNameAndStatus(String categoryName, BlogStatus status, Pageable pageable);
+
+//    @Query("SELECT b FROM Blog b WHERE (:search IS NULL OR b.title LIKE CONCAT('%', :search, '%') " +
+//            "OR b.shortDescription LIKE CONCAT('%', :search, '%') " +
 //            "OR :search MEMBER OF b.tags)")
 //    Page<Blog> searchBlogs(@Param("search") String search, Pageable pageable);
-    @Query("SELECT b FROM Blog b WHERE (:search IS NULL OR b.title LIKE CONCAT('%', :search, '%') " +
+
+    @Query("SELECT b FROM Blog b WHERE b.status = 'APPROVED' AND " +
+            "(:search IS NULL OR b.title LIKE CONCAT('%', :search, '%') " +
             "OR b.shortDescription LIKE CONCAT('%', :search, '%') " +
             "OR :search MEMBER OF b.tags)")
     Page<Blog> searchBlogs(@Param("search") String search, Pageable pageable);

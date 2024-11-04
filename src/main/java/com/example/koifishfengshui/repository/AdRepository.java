@@ -34,6 +34,11 @@ public interface AdRepository extends JpaRepository<Advertisement, Long> {
 
     Page<Advertisement> findByStatus(AdStatus status, Pageable pageable);
 
+    @Query("SELECT a FROM Advertisement a " +
+            "JOIN a.subscriptionPlan sp " +
+            "WHERE a.status = 'PUBLISHED' ")
+    List<Advertisement> findPublicAds();
+
     Page<Advertisement> findByUserUser(Long user, Pageable pageable);
 
     @Query("SELECT a FROM Advertisement a " +
