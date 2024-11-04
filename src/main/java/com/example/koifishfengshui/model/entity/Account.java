@@ -40,6 +40,9 @@ public class Account implements UserDetails {
     @Column(nullable = true)
     private String password;
 
+    @Column
+    private String fcmToken;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LoginProvider loginProvider;

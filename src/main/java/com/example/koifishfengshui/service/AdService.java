@@ -3,6 +3,7 @@ package com.example.koifishfengshui.service;
 import com.example.koifishfengshui.enums.AdStatus;
 import com.example.koifishfengshui.enums.PaymentStatus;
 import com.example.koifishfengshui.exception.EntityNotFoundException;
+import com.example.koifishfengshui.model.NotificationFCM;
 import com.example.koifishfengshui.model.entity.*;
 import com.example.koifishfengshui.model.request.AdRequest;
 import com.example.koifishfengshui.model.request.SubscriptionPlanRequest;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +69,8 @@ public class AdService {
     @Autowired
     private CloudinaryService cloudinaryService;
 
+    @Autowired
+    private NotificationService notificationService;
 
     private static final String CONFIRMATION_TEMPLATE = "order-confirmation-template";
 
@@ -214,7 +218,16 @@ public class AdService {
         ad.setStatus(status);
         adRepository.save(ad);
 
+        Account adOwner = ad.getUser().getAccount(); // Assuming this is how you get the user who posted the ad
         logAdStatusChange(ad, status, ((Account) authentication.getPrincipal()).getUser());
+
+        // Send FCM notification
+        NotificationFCM notificationFCM = new NotificationFCM(
+                "Ads Status Updated",
+                "Your ad status has been updated to: " + status.name(),
+                adOwner.getFcmToken()
+        );
+        notificationService.sendNotificationToAccount(notificationFCM, adOwner);
 
         return mapToAdResponse(ad);
     }
@@ -321,6 +334,18 @@ public class AdService {
         logAdStatusChange(ad, AdStatus.PUBLISHED, ad.getUser());
 
         return mapToAdResponse(ad);
+    }
+
+    @Transactional
+    public List<AdResponse> getRandomAds() {
+        List<Advertisement> products = adRepository.findPublicAds();
+
+        Collections.shuffle(products);
+
+        return products.stream()
+                .limit(3)
+                .map(this::mapToAdResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional

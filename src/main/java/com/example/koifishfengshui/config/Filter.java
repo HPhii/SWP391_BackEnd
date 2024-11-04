@@ -37,7 +37,15 @@ public class Filter extends OncePerRequestFilter {
             "/api/fate/calculate",
             "/api/auth/login/google",
             "/api/products/random",
-            "api/blogs/**"
+            "/api/blogs/get",
+            "/api/blogs/search",
+            "/api/blogs/category/{categoryName}",
+            "/api/blogs/get/{blogId}",
+            "/api/ads/active",
+            "/api/ads/random",
+            "/api/ads/id/{adId}",
+            "/api/categories",
+            "/api/notification"
     );
 
     @Autowired
@@ -66,12 +74,16 @@ public class Filter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        boolean isPublicAPI = checkIsPublicAPI(request.getRequestURI());
+        String uri = request.getRequestURI();
+        boolean isPublicAPI = checkIsPublicAPI(uri);
+
+        // Nếu là API công khai, không cần xác thực.
         if (isPublicAPI) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // Nếu là API yêu cầu xác thực.
         String token = getToken(request);
         if (token == null) {
             handlerExceptionResolver.resolveException(request, response, null,
@@ -85,9 +97,8 @@ public class Filter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(account, token, account.getAuthorities());
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-            filterChain.doFilter(request, response); // Tiếp tục xử lý nếu token hợp lệ.
-        } catch (AuthException e) { // Thêm bắt AuthException để xử lý token bị blacklist.
+            filterChain.doFilter(request, response);
+        } catch (AuthException e) {
             handlerExceptionResolver.resolveException(request, response, null, e);
         } catch (ExpiredJwtException e) {
             handlerExceptionResolver.resolveException(request, response, null,
@@ -97,6 +108,7 @@ public class Filter extends OncePerRequestFilter {
                     new AuthException("Invalid Token!!!"));
         }
     }
+
 
 
 }
