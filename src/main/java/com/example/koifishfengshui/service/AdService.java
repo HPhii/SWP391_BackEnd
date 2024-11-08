@@ -218,16 +218,16 @@ public class AdService {
         ad.setStatus(status);
         adRepository.save(ad);
 
-        Account adOwner = ad.getUser().getAccount(); // Assuming this is how you get the user who posted the ad
+//        Account adOwner = ad.getUser().getAccount();
         logAdStatusChange(ad, status, ((Account) authentication.getPrincipal()).getUser());
 
         // Send FCM notification
-        NotificationFCM notificationFCM = new NotificationFCM(
-                "Ads Status Updated",
-                "Your ad status has been updated to: " + status.name(),
-                adOwner.getFcmToken()
-        );
-        notificationService.sendNotificationToAccount(notificationFCM, adOwner);
+//        NotificationFCM notificationFCM = new NotificationFCM(
+//                "Ads Status Updated",
+//                "Your advertisement status has been updated to: " + status.name(),
+//                adOwner.getFcmToken()
+//        );
+//        notificationService.sendNotificationToAccount(notificationFCM, adOwner);
 
         return mapToAdResponse(ad);
     }
@@ -236,7 +236,7 @@ public class AdService {
     @Transactional
     public String selectSubscriptionPlan(Long adId, SubscriptionPlanRequest planRequest, Authentication authentication) throws Exception {
         Advertisement ad = adRepository.findById(adId)
-                .orElseThrow(() -> new EntityNotFoundException("Ad not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Ads not found."));
 
         validateAdStatusForSubscription(ad);
 
@@ -249,7 +249,7 @@ public class AdService {
 
         logAdStatusChange(ad, AdStatus.PENDING_PAYMENT, ad.getUser());
 
-        TransactionHistory transaction = transactionService.createTransaction(ad.getUser(), ad, plan.getPrice());
+        TransactionHistory transaction = transactionService.createTransaction(ad.getUser(), ad, plan.getPrice(), plan);
         return paymentService.createUrl(transaction, plan);
     }
 
@@ -359,7 +359,7 @@ public class AdService {
 
         SubscriptionPlan currentPlan = ad.getSubscriptionPlan();
 
-        TransactionHistory transaction = transactionService.createTransaction(ad.getUser(), ad, currentPlan.getPrice());
+        TransactionHistory transaction = transactionService.createTransaction(ad.getUser(), ad, currentPlan.getPrice(), currentPlan);
         String paymentUrl = paymentService.createUrl(transaction, currentPlan);
 
         ad.setStatus(AdStatus.PENDING_PAYMENT);

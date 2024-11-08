@@ -20,6 +20,10 @@ public class SubscriptionPlan {
     @JsonIgnore
     private List<Advertisement> advertisements;
 
+    @OneToMany(mappedBy = "subscriptionPlan", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<TransactionHistory> transactionHistories;
+
     @Column(name = "plan_name", nullable = false, unique = true)
     private String planName;
 

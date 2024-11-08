@@ -45,7 +45,8 @@ public class Filter extends OncePerRequestFilter {
             "/api/ads/random",
             "/api/ads/id/{adId}",
             "/api/categories",
-            "/api/notification"
+            "/api/notification",
+            "/api/auth/fcm"
     );
 
     @Autowired

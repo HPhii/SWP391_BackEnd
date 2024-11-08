@@ -20,6 +20,10 @@ public class TransactionHistory {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "subscription_plan", nullable = false)
+    private SubscriptionPlan subscriptionPlan;
+
     @Column(nullable = false)
     private Double amount;
 
