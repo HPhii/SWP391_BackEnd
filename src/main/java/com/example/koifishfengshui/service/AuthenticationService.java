@@ -103,9 +103,9 @@ public class AuthenticationService implements UserDetailsService {
             return accountResponse;
         } catch (Exception e) {
             if (e.getMessage().contains(account.getEmail())) {
-                throw new DuplicateEntity("Duplicate email");
+                throw new DuplicateEntity("This email is already registered!!!");
             } else {
-                throw new DuplicateEntity("Duplicate entity");
+                throw new DuplicateEntity("This username is already used by others!!");
             }
         }
     }

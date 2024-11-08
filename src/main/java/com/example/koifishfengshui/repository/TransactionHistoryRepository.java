@@ -3,6 +3,7 @@ package com.example.koifishfengshui.repository;
 import com.example.koifishfengshui.enums.PaymentStatus;
 import com.example.koifishfengshui.model.entity.TransactionHistory;
 import com.example.koifishfengshui.model.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,5 +29,8 @@ public interface TransactionHistoryRepository extends JpaRepository<TransactionH
             "WHERE t.paymentStatus = 'SUCCESS' AND YEAR(t.transactionDate) = :year " +
             "GROUP BY MONTH(t.transactionDate)")
     List<Object[]> getMonthlyRevenue(@Param("year") int year);
+
+    Page<TransactionHistory> findByUserUser(Long userId, Pageable pageable);
+
 }
 

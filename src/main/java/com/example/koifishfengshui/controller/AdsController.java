@@ -151,7 +151,7 @@ public class AdsController {
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Payment successful");
             response.put("adId", ad.getAdId());
-            response.put("redirectUrl", "ads/adId=" + ad.getAdId());
+            response.put("redirectUrl", "product/" + ad.getAdId());
             return ResponseEntity.ok(response);
         } else {
             adService.handlePaymentResponse(transactionId, false);

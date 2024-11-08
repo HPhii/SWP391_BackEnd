@@ -81,5 +81,4 @@ public class AuthController {
         Account updatedAccount = accountService.updateFCM(updateFCMRequest);
         return ResponseEntity.ok("FCM token updated successfully");
     }
-
 }
