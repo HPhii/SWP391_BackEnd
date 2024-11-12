@@ -30,6 +30,7 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
             "OR :search MEMBER OF b.tags)")
     Page<Blog> searchBlogs(@Param("search") String search, Pageable pageable);
 
+    Page<Blog> findByAuthorUser(Long user, Pageable pageable);
 }
 
 

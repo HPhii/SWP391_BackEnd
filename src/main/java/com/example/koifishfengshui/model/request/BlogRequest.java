@@ -14,5 +14,5 @@ public class BlogRequest {
     private String shortDescription;
     private String categoryName;
     private MultipartFile imageFile;
-    private Set<@Size(max = 50, message = "Tag must not exceed 50 characters") String> tags;
+//    private Set<@Size(max = 50, message = "Tag must not exceed 50 characters") String> tags;
 }

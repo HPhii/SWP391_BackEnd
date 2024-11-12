@@ -106,4 +106,18 @@ public class UserService {
         user.setStatus(Status.INACTIVE);
         return userRepository.save(user);
     }
+
+    public User toggleUserStatus(long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Account account = user.getAccount();
+        if (account != null) {
+            account.setStatus(account.getStatus() == Status.ACTIVE ? Status.INACTIVE : Status.ACTIVE);
+            accountRepository.save(account);
+        }
+        user.setStatus(user.getStatus() == Status.ACTIVE ? Status.INACTIVE : Status.ACTIVE);
+        return userRepository.save(user);
+    }
+
 }
