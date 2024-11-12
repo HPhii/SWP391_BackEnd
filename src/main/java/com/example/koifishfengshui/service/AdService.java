@@ -405,4 +405,3 @@ public class AdService {
         return adRepository.countByUserUser(user.getUser());
     }
 }
-

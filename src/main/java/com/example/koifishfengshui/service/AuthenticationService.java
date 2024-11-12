@@ -76,6 +76,14 @@ public class AuthenticationService implements UserDetailsService {
             throw new PasswordMismatchEntity("Passwords do not match!");
         }
 
+        // Check if email or username already exists
+        if (accountRepository.existsByEmail(registerRequestDTO.getEmail())) {
+            throw new DuplicateEntity("This email is already registered!!!");
+        }
+        if (accountRepository.existsByUsername(registerRequestDTO.getUsername())) {
+            throw new DuplicateEntity("This username is already used by others!!");
+        }
+
         Account account = modelMapper.map(registerRequestDTO, Account.class);
 
         User newUser = new User();
@@ -91,24 +99,17 @@ public class AuthenticationService implements UserDetailsService {
         account.setUpdatedAt(LocalDateTime.now());
         account.setUser(newUser);
 
-        try {
-            userRepository.save(newUser);
-            Account newAccount = accountRepository.save(account);
+        userRepository.save(newUser);
+        Account newAccount = accountRepository.save(account);
 
-            AccountResponse accountResponse = modelMapper.map(newAccount, AccountResponse.class);
-            accountResponse.setUserId(newUser.getUser());
+        AccountResponse accountResponse = modelMapper.map(newAccount, AccountResponse.class);
+        accountResponse.setUserId(newUser.getUser());
 
-            sendMail(newAccount);
+        sendMail(newAccount);
 
-            return accountResponse;
-        } catch (Exception e) {
-            if (e.getMessage().contains(account.getEmail())) {
-                throw new DuplicateEntity("This email is already registered!!!");
-            } else {
-                throw new DuplicateEntity("This username is already used by others!!");
-            }
-        }
+        return accountResponse;
     }
+
 
 
     private void sendMail(Account newAccount) {

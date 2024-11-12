@@ -20,8 +20,8 @@ public interface TransactionHistoryRepository extends JpaRepository<TransactionH
     Double getTotalRevenue();
 
     // Lấy danh sách top 10 người dùng chi tiêu nhiều nhất
-    @Query("SELECT t.user FROM TransactionHistory t WHERE t.paymentStatus = 'SUCCESS' GROUP BY t.user ORDER BY SUM(t.amount) DESC")
-    List<User> findTopSpendingUsers(Pageable pageable);
+    @Query("SELECT t.user, SUM(t.amount) as totalSpent FROM TransactionHistory t WHERE t.paymentStatus = 'SUCCESS' GROUP BY t.user ORDER BY totalSpent DESC")
+    List<Object[]> findTopSpendingUsersWithAmount(Pageable pageable);
 
     // Truy vấn tổng doanh thu theo từng tháng trong năm hiện tại
     @Query("SELECT MONTH(t.transactionDate) AS month, SUM(t.amount) AS revenue " +

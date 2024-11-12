@@ -22,10 +22,12 @@ public class Blog {
     @Column(nullable = false)
     private String thumbnail;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
+    @Lob
     private String content;
 
-    @Column(name = "short_description", nullable = false)
+    @Column(name = "short_description", nullable = false, columnDefinition = "LONGTEXT")
+    @Lob
     private String shortDescription;
 
     @ManyToOne

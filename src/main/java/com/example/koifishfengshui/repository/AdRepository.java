@@ -23,7 +23,7 @@ public interface AdRepository extends JpaRepository<Advertisement, Long> {
     @Query("SELECT a FROM Advertisement a " +
             "JOIN a.subscriptionPlan sp " +
             "WHERE a.status = 'PUBLISHED' " +
-            "AND CURRENT_TIMESTAMP BETWEEN a.startDate AND a.endDate " +
+            "AND CURRENT_DATE BETWEEN FUNCTION('DATE', a.startDate) AND FUNCTION('DATE', a.endDate) " +
             "ORDER BY " +
             "CASE WHEN sp.adPlacementPriority = 'HIGH' THEN 3 " +
             "WHEN sp.adPlacementPriority = 'MEDIUM' THEN 2 " +
@@ -38,6 +38,18 @@ public interface AdRepository extends JpaRepository<Advertisement, Long> {
             "JOIN a.subscriptionPlan sp " +
             "WHERE a.status = 'PUBLISHED' ")
     List<Advertisement> findPublicAds();
+
+//    @Query("SELECT a FROM Advertisement a " +
+//            "JOIN a.subscriptionPlan sp " +
+//            "WHERE a.status = 'PUBLISHED' " +
+//            "AND CURRENT_TIMESTAMP BETWEEN a.startDate AND a.endDate " +
+//            "ORDER BY " +
+//            "CASE WHEN sp.adPlacementPriority = 'HIGH' THEN 3 " +
+//            "WHEN sp.adPlacementPriority = 'MEDIUM' THEN 2 " +
+//            "WHEN sp.adPlacementPriority = 'LOW' THEN 1 " +
+//            "ELSE 0 END DESC, " +
+//            "a.createdAt DESC")
+//    List<Advertisement> findPublishedAds();
 
     Page<Advertisement> findByUserUser(Long user, Pageable pageable);
 

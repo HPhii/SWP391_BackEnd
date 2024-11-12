@@ -4,6 +4,7 @@ package com.example.koifishfengshui.controller;
 import com.example.koifishfengshui.enums.BlogStatus;
 import com.example.koifishfengshui.model.request.BlogRequest;
 import com.example.koifishfengshui.model.response.dto.BlogResponse;
+import com.example.koifishfengshui.model.response.paged.PagedAdResponse;
 import com.example.koifishfengshui.model.response.paged.PagedBlogResponse;
 import com.example.koifishfengshui.service.BlogService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -94,6 +95,17 @@ public class BlogController {
 
         Pageable pageable = PageRequest.of(page, size);
         PagedBlogResponse response = blogService.getBlogsByCategory(categoryName, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<PagedBlogResponse> getUserBlog(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        PagedBlogResponse response = blogService.getUserBlog(pageable);
+
         return ResponseEntity.ok(response);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.koifishfengshui.controller;
 
 import com.example.koifishfengshui.enums.Status;
+import com.example.koifishfengshui.model.entity.User;
 import com.example.koifishfengshui.model.request.UpdateUserRequest;
 import com.example.koifishfengshui.model.response.dto.UserProfileResponse;
 import com.example.koifishfengshui.model.response.paged.PagedUserResponse;
@@ -58,4 +59,11 @@ public class UserController {
     public ResponseEntity delete(@PathVariable long userId) {
         return ResponseEntity.ok(userService.deleteUser(userId));
     }
+
+    @PatchMapping("/{userId}/toggle-status")
+    public ResponseEntity<User> toggleUserStatus(@PathVariable Long userId) {
+        User user = userService.toggleUserStatus(userId);
+        return ResponseEntity.ok(user);
+    }
+
 }

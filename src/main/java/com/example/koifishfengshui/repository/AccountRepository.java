@@ -3,6 +3,8 @@ package com.example.koifishfengshui.repository;
 
 import com.example.koifishfengshui.enums.Role;
 import com.example.koifishfengshui.model.entity.Account;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +27,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     // Đếm số lượng người dùng mới từ một ngày nhất định
     @Query("SELECT COUNT(a) FROM Account a WHERE a.createdAt >= :createdAt")
     long countByCreatedAtAfter(@Param("createdAt") LocalDateTime createdAt);
+
+    boolean existsByEmail(@Email(message = "Invalid email format") @NotBlank(message = "Email cannot be blank") String email);
 }

@@ -99,7 +99,7 @@ public class BlogService {
             String imageUrl = cloudinaryService.uploadImage(blogRequest.getImageFile());
             existingBlog.setImageUrl(imageUrl);
         }
-        if (blogRequest.getTags() != null) existingBlog.setTags(blogRequest.getTags());
+//        if (blogRequest.getTags() != null) existingBlog.setTags(blogRequest.getTags());
         if (blogRequest.getCategoryName() != null) {
             Category category = categoryService.findOrCreateCategory(blogRequest.getCategoryName());
             existingBlog.setCategory(category);
@@ -189,4 +189,23 @@ public class BlogService {
         );
     }
 
+    public PagedBlogResponse getUserBlog(Pageable pageable) {
+        Account account = authenticationService.getCurrentAccount();
+        User user = account.getUser();
+
+        Page<Blog> blogPage = blogRepository.findByAuthorUser(user.getUser(), pageable);
+
+        List<BlogResponse> blogResponses = blogPage.getContent()
+                .stream()
+                .map(this::mapToBlogResponse)
+                .collect(Collectors.toList());
+
+        return new PagedBlogResponse(
+                blogResponses,
+                blogPage.getTotalElements(),
+                blogPage.getTotalPages(),
+                pageable.getPageNumber()
+        );
+
+    }
 }

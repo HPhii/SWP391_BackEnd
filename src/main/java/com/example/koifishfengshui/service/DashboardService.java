@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,12 +64,26 @@ public class DashboardService {
                 .sum();
         stats.put("totalRevenue", totalRevenue);
 
-        List<User> topSpendingUsers = transactionHistoryRepository.findTopSpendingUsers(PageRequest.of(0, 10));
+        List<Object[]> topSpendingUsersData = transactionHistoryRepository.findTopSpendingUsersWithAmount(PageRequest.of(0, 10));
+        List<Map<String, Object>> topSpendingUsers = new ArrayList<>();
+
+        for (Object[] data : topSpendingUsersData) {
+            User user = (User) data[0];
+            Double totalSpent = (Double) data[1];
+
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("user", user);
+            userData.put("totalSpent", totalSpent);
+
+            topSpendingUsers.add(userData);
+        }
+
         stats.put("topSpendingUsers", topSpendingUsers);
+
 
         // Transaction History (biểu đồ tròn)
         long successfulTransactions = transactionHistoryRepository.countByPaymentStatus(PaymentStatus.SUCCESS);
-        long failedTransactions = transactionHistoryRepository.countByPaymentStatus(PaymentStatus.PENDING);
+        long failedTransactions = transactionHistoryRepository.countByPaymentStatus(PaymentStatus.FAILED);
         stats.put("successfulTransactions", successfulTransactions);
         stats.put("failedTransactions", failedTransactions);
 
